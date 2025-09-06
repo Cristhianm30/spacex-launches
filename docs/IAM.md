@@ -26,6 +26,7 @@ Adjuntar las siguientes **políticas administradas por AWS**:
 - `AmazonAPIGatewayAdministrator` → crear y administrar API Gateway.  
 - `CloudWatchLogsFullAccess` → escribir y consultar logs en CloudWatch.  
 - `AmazonEventBridgeFullAccess` → crear reglas de ejecución programada.  
+- `IAMFullAccess` → solo si necesitas crear roles de ejecución automáticamente desde SAM. 
 
 👉 Estos permisos son **suficientes y necesarios** para la prueba técnica.  
 👉 En producción se recomendaría usar permisos más restrictivos, pero aquí es correcto.  

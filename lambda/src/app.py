@@ -90,23 +90,41 @@ def upsert_launch(launch: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def process_launches(launches: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    
-    results = []
     successful_count = 0
     failed_count = 0
     
-    for launch in launches:
-        try:
-            saved_item = upsert_launch(launch)
-            results.append(saved_item)
-            successful_count += 1
-        except Exception as e:
-            failed_count += 1
-            logger.error(f"Failed to process launch {launch.get('id', 'unknown')}: {str(e)}")
-            continue
-    
+    with table.batch_writer() as batch:
+        for launch in launches:
+            try:
+                status = determine_launch_status(launch)
+                
+                item = {
+                    "launch_id": launch.get("id"),
+                    "mission_name": launch.get("name", "Unknown Mission"),
+                    "rocket_id": launch.get("rocket", ""),
+                    "launch_date": launch.get("date_utc", ""),
+                    "launchpad_id": launch.get("launchpad", ""),
+                    "payloads": launch.get("payloads", []),
+                    "status": status,
+                    "links": launch.get("links", {}),
+                    "details": launch.get("details", "")
+                }
+
+                if not item["launch_id"]:
+                    logger.warning(f"Skipping launch with missing ID: {launch.get('name')}")
+                    failed_count += 1
+                    continue
+
+                batch.put_item(Item=item)
+                successful_count += 1
+            
+            except Exception as e:
+                failed_count += 1
+                logger.error(f"Failed to process launch {launch.get('id', 'unknown')} for batching: {str(e)}")
+                continue
+
     logger.info(f"Processing completed: {successful_count} successful, {failed_count} failed")
-    return results
+    return {"processed": successful_count, "failed": failed_count}
 
 
 def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
@@ -128,12 +146,13 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 })
             }
         
-        results = process_launches(launches)
+        results_summary = process_launches(launches)
         
         response_body = {
             "message": "SpaceX data synchronization completed successfully",
-            "total_launches": len(launches),
-            "processed_count": len(results),
+            "total_launches_fetched": len(launches),
+            "successful_items": results_summary.get("processed", 0),
+            "failed_items": results_summary.get("failed", 0),       
             "request_id": request_id
         }
         

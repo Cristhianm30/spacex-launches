@@ -1,0 +1,28 @@
+server:
+  port: ${SERVER_PORT}
+
+spring:
+  config:
+    activate:
+      on-profile: local
+
+springdoc:
+  swagger-ui:
+    enabled: true
+
+aws:
+  region: ${AWS_REGION}
+  access : ${AWS_ACCESS_KEY_ID}
+  secret : ${AWS_SECRET_ACCESS_KEY}
+
+  dynamodb:
+    table-name: ${DYNAMODB_TABLE_NAME}
+    endpoint: ${DYNAMODB_ENDPOINT}
+
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.data.jpa: DEBUG
+    io.github.cristhianm30.spacex-launches-back: DEBUG

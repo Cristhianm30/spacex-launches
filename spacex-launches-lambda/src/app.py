@@ -66,13 +66,19 @@ def upsert_launch(launch: Dict[str, Any]) -> Dict[str, Any]:
         item = {
             "launch_id": launch_id,
             "mission_name": launch.get("name", "Unknown Mission"),
+            "flight_number": launch.get("flight_number"),
+            "launch_date_utc": launch.get("date_utc", ""),
+            "success": launch.get("success"),
+            "details": launch.get("details", ""),
             "rocket_id": launch.get("rocket", ""),
-            "launch_date": launch.get("date_utc", ""),
             "launchpad_id": launch.get("launchpad", ""),
             "payloads": launch.get("payloads", []),
-            "status": status,
-            "links": launch.get("links", {}),
-            "details": launch.get("details", "")
+            "patch_small_link": launch.get("links", {}).get("patch", {}).get("small", None),
+            "patch_large_link": launch.get("links", {}).get("patch", {}).get("large", None),
+            "webcast_link": launch.get("links", {}).get("webcast", None),
+            "article_link": launch.get("links", {}).get("article", None),
+            "wikipedia_link": launch.get("links", {}).get("wikipedia", None),
+            "status": status
         }
         
         logger.debug(f"Upserting launch: {launch_id} - {item.get('mission_name')}")
@@ -101,13 +107,19 @@ def process_launches(launches: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                 item = {
                     "launch_id": launch.get("id"),
                     "mission_name": launch.get("name", "Unknown Mission"),
+                    "flight_number": launch.get("flight_number"),
+                    "launch_date_utc": launch.get("date_utc", ""),
+                    "success": launch.get("success"),
+                    "details": launch.get("details", ""),
                     "rocket_id": launch.get("rocket", ""),
-                    "launch_date": launch.get("date_utc", ""),
                     "launchpad_id": launch.get("launchpad", ""),
                     "payloads": launch.get("payloads", []),
-                    "status": status,
-                    "links": launch.get("links", {}),
-                    "details": launch.get("details", "")
+                    "patch_small_link": launch.get("links", {}).get("patch", {}).get("small", None),
+                    "patch_large_link": launch.get("links", {}).get("patch", {}).get("large", None),
+                    "webcast_link": launch.get("links", {}).get("webcast", None),
+                    "article_link": launch.get("links", {}).get("article", None),
+                    "wikipedia_link": launch.get("links", {}).get("wikipedia", None),
+                    "status": status
                 }
 
                 if not item["launch_id"]:

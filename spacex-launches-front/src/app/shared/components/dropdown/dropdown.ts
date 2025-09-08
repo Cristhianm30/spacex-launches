@@ -45,6 +45,8 @@ export class Dropdown {
       if (this.isOpen) {
         this.searchTerm = '';
         this.filteredOptions = [...this.options];
+      } else {
+        this.searchTerm = '';
       }
     }
   }

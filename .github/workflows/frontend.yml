@@ -35,7 +35,7 @@ jobs:
       # 5. Build Docker image
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.ECR_REGISTRY }}/spacex-front:latest spacex-launches-front
+          docker build -t ${{ secrets.ECR_REGISTRY }}/spacex-launches-front:latest spacex-launches-front
 
         # 7. Configurar credenciales de AWS
       - name: Configure AWS credentials

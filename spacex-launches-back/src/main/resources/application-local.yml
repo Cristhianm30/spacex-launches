@@ -15,6 +15,7 @@ aws:
   secret : ${AWS_SECRET_ACCESS_KEY}
 
 
+
 logging:
   level:
     org.springframework.security: DEBUG

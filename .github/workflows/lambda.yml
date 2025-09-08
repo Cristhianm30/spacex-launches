@@ -39,8 +39,14 @@ jobs:
       # 5. Empaquetar Lambda en ZIP
       - name: Package Lambda
         run: |
-          cd spacex-launches-lambda
-          zip -r function.zip .
+            cd spacex-launches-lambda
+            mkdir -p package
+            # instalar dependencias en la carpeta package
+            pip install -r requirements.txt -t package
+            # copiar el código fuente (incluyendo app.py) dentro de package
+            cp -r src/* package/
+            cd package
+            zip -r ../function.zip .
 
       # 6. Configurar credenciales AWS
       - name: Configure AWS credentials

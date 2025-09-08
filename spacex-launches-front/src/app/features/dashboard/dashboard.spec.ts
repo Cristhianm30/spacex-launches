@@ -17,14 +17,36 @@ describe('Dashboard', () => {
   };
 
   const mockRecentLaunches = [
-    { id: '1', name: 'Test Launch 1', success: true },
-    { id: '2', name: 'Test Launch 2', success: false }
+    { 
+      launchId: '1', 
+      missionName: 'Test Launch 1', 
+      flightNumber: 1,
+      launchDateUtc: '2023-01-01T00:00:00.000Z',
+      status: 'success',
+      rocketId: 'rocket1'
+    },
+    { 
+      launchId: '2', 
+      missionName: 'Test Launch 2', 
+      flightNumber: 2,
+      launchDateUtc: '2023-01-02T00:00:00.000Z',
+      status: 'failure',
+      rocketId: 'rocket2'
+    }
   ];
+
+  const mockPaginatedResponse = {
+    content: mockRecentLaunches,
+    number: 0,
+    size: 9,
+    totalElements: 2
+  };
 
   beforeEach(async () => {
     mockLaunchService = {
       getLaunchStatistics: jest.fn(),
-      getRecentLaunches: jest.fn()
+      getRecentLaunches: jest.fn(),
+      getPaginatedLaunches: jest.fn()
     };
 
     await TestBed.configureTestingModule({
@@ -43,25 +65,27 @@ describe('Dashboard', () => {
   });
 
   it('should initialize with default values', () => {
-    expect(component.loading).toBe(true);
+    expect(component.isLoading).toBe(false);
     expect(component.error).toBe(null);
     expect(component.recentLaunches).toEqual([]);
     expect(component.stats).toHaveLength(5);
+    expect(component.currentPage).toBe(0);
+    expect(component.pageSize).toBe(9);
   });
 
   it('should load dashboard data on init', () => {
     mockLaunchService.getLaunchStatistics.mockReturnValue(of(mockStatistics));
-    mockLaunchService.getRecentLaunches.mockReturnValue(of(mockRecentLaunches));
+    mockLaunchService.getPaginatedLaunches.mockReturnValue(of(mockPaginatedResponse));
 
     component.ngOnInit();
 
     expect(mockLaunchService.getLaunchStatistics).toHaveBeenCalled();
-    expect(mockLaunchService.getRecentLaunches).toHaveBeenCalledWith(6);
+    expect(mockLaunchService.getPaginatedLaunches).toHaveBeenCalledWith(0, 9, undefined);
   });
 
   it('should update stats when statistics are loaded', () => {
     mockLaunchService.getLaunchStatistics.mockReturnValue(of(mockStatistics));
-    mockLaunchService.getRecentLaunches.mockReturnValue(of(mockRecentLaunches));
+    mockLaunchService.getPaginatedLaunches.mockReturnValue(of(mockPaginatedResponse));
 
     component.ngOnInit();
 
@@ -74,42 +98,46 @@ describe('Dashboard', () => {
 
   it('should set recent launches when data is loaded', () => {
     mockLaunchService.getLaunchStatistics.mockReturnValue(of(mockStatistics));
-    mockLaunchService.getRecentLaunches.mockReturnValue(of(mockRecentLaunches));
+    mockLaunchService.getPaginatedLaunches.mockReturnValue(of(mockPaginatedResponse));
 
     component.ngOnInit();
 
     expect(component.recentLaunches).toEqual(mockRecentLaunches);
-    expect(component.loading).toBe(false);
+    expect(component.isLoading).toBe(false);
   });
 
   it('should handle statistics error', () => {
     mockLaunchService.getLaunchStatistics.mockReturnValue(throwError('Statistics error'));
-    mockLaunchService.getRecentLaunches.mockReturnValue(of(mockRecentLaunches));
+    mockLaunchService.getPaginatedLaunches.mockReturnValue(of(mockPaginatedResponse));
 
     component.ngOnInit();
 
     expect(component.error).toBe('Failed to load launch statistics');
-    expect(component.loading).toBe(false);
+    expect(component.isLoading).toBe(false);
   });
 
   it('should handle recent launches error', () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
     mockLaunchService.getLaunchStatistics.mockReturnValue(of(mockStatistics));
-    mockLaunchService.getRecentLaunches.mockReturnValue(throwError('Recent launches error'));
+    mockLaunchService.getPaginatedLaunches.mockReturnValue(throwError('Recent launches error'));
 
     component.ngOnInit();
 
-    expect(component.error).toBe('Failed to load recent launches');
-    expect(component.loading).toBe(false);
+    expect(component.error).toBe('Failed to load launches');
+    expect(component.isLoading).toBe(false);
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Error loading paginated launches:', 'Recent launches error');
+    
+    consoleErrorSpy.mockRestore();
   });
 
   it('should refresh data when refreshData is called', () => {
     mockLaunchService.getLaunchStatistics.mockReturnValue(of(mockStatistics));
-    mockLaunchService.getRecentLaunches.mockReturnValue(of(mockRecentLaunches));
+    mockLaunchService.getPaginatedLaunches.mockReturnValue(of(mockPaginatedResponse));
 
     component.refreshData();
 
     expect(mockLaunchService.getLaunchStatistics).toHaveBeenCalled();
-    expect(mockLaunchService.getRecentLaunches).toHaveBeenCalledWith(6);
+    expect(mockLaunchService.getPaginatedLaunches).toHaveBeenCalledWith(0, 9, undefined);
   });
 
   it('should handle null statistics gracefully', () => {
@@ -122,7 +150,7 @@ describe('Dashboard', () => {
     };
 
     mockLaunchService.getLaunchStatistics.mockReturnValue(of(nullStats));
-    mockLaunchService.getRecentLaunches.mockReturnValue(of([]));
+    mockLaunchService.getPaginatedLaunches.mockReturnValue(of({ content: [], number: 0, size: 9, totalElements: 0 }));
 
     component.ngOnInit();
 
@@ -131,5 +159,26 @@ describe('Dashboard', () => {
     expect(component.stats[2].value).toBe('0');
     expect(component.stats[3].value).toBe('0');
     expect(component.stats[4].value).toBe('0');
+  });
+
+  it('should handle pagination correctly', () => {
+    mockLaunchService.getLaunchStatistics.mockReturnValue(of(mockStatistics));
+    mockLaunchService.getPaginatedLaunches.mockReturnValue(of(mockPaginatedResponse));
+
+    component.ngOnInit();
+
+    expect(component.totalElements).toBe(2);
+    expect(component.totalPages).toBe(1);
+  });
+
+  it('should filter launches by status', () => {
+    mockLaunchService.getLaunchStatistics.mockReturnValue(of(mockStatistics));
+    mockLaunchService.getPaginatedLaunches.mockReturnValue(of(mockPaginatedResponse));
+
+    component.onStatusFilter('success');
+
+    expect(component.selectedStatus).toBe('success');
+    expect(component.currentPage).toBe(0);
+    expect(mockLaunchService.getPaginatedLaunches).toHaveBeenCalledWith(0, 9, 'success');
   });
 });

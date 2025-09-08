@@ -2,16 +2,11 @@ name: Backend CI/CD
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: ["develop"]
     paths:
       - "spacex-launches-back/**"
       - ".github/workflows/backend.yml"
 
-  pull_request:
-    branches: [ "main", "develop" ]
-    paths:
-      - "spacex-launches-back/**"
-      - ".github/workflows/backend.yml"
 
 jobs:
   deploy-backend:

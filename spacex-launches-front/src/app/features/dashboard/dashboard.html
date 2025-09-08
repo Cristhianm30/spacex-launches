@@ -134,7 +134,7 @@
       
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         @for (launch of recentLaunches; track launch.launchId) {
-          <app-launch-card [launch]="launch"></app-launch-card>
+          <app-launch-card [launch]="launch" (cardClick)="onLaunchCardClick($event)"></app-launch-card>
         }
         
         @if (recentLaunches.length === 0) {
@@ -224,3 +224,10 @@
     </div>
   }
 </div>
+
+<!-- Launch Detail Modal -->
+<app-launch-detail-modal 
+  [launchId]="selectedLaunchId"
+  [isOpen]="isModalOpen"
+  (closeModal)="onModalClose()">
+</app-launch-detail-modal>

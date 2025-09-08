@@ -8,7 +8,7 @@ export const routes: Routes = [
     component: Shell,
     children: [
       {
-        path: '/dashboard',
+        path: 'dashboard',
         loadComponent: () =>
           import('./features/dashboard/dashboard').then(m => m.Dashboard)
       },

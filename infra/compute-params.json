@@ -1,0 +1,22 @@
+[
+  {
+    "ParameterKey": "VpcId",
+    "ParameterValue": "vpc-00a160..."
+  },
+  {
+    "ParameterKey": "Subnets",
+    "ParameterValue": "subnet-01957...,subnet-052712..."
+  },
+  {
+    "ParameterKey": "ProjectName",
+    "ParameterValue": "spacex-launches"
+  },
+  {
+    "ParameterKey": "BackendImageTag",
+    "ParameterValue": "latest"
+  },
+  {
+    "ParameterKey": "FrontendImageTag",
+    "ParameterValue": "latest"
+  }
+]

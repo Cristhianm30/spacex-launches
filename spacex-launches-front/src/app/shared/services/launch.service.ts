@@ -82,6 +82,7 @@ export class LaunchService {
     return this.getStats();
   }
 
+
   /**
    * Get paginated launches
    */

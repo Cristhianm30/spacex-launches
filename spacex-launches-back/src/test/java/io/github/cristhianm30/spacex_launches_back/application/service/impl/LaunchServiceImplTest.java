@@ -2,6 +2,7 @@ package io.github.cristhianm30.spacex_launches_back.application.service.impl;
 
 import io.github.cristhianm30.spacex_launches_back.application.dto.response.LaunchResponse;
 import io.github.cristhianm30.spacex_launches_back.application.dto.response.LaunchSummaryResponse;
+import io.github.cristhianm30.spacex_launches_back.application.dto.response.StatsDataResponse;
 import io.github.cristhianm30.spacex_launches_back.application.mapper.LaunchMapperDto;
 import io.github.cristhianm30.spacex_launches_back.domain.model.LaunchModel;
 import io.github.cristhianm30.spacex_launches_back.domain.port.in.LaunchUseCasePort;
@@ -19,7 +20,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -104,7 +104,7 @@ class LaunchServiceImplTest {
         // Given
         List<LaunchModel> launches = Arrays.asList(launchModel);
         List<LaunchSummaryResponse> expectedResponses = Arrays.asList(launchSummaryResponse);
-        
+
         when(useCasePort.getAllLaunches()).thenReturn(launches);
         when(mapper.toSummaryResponseList(launches)).thenReturn(expectedResponses);
 
@@ -117,13 +117,14 @@ class LaunchServiceImplTest {
         verify(mapper).toSummaryResponseList(launches);
     }
 
+
     @Test
     void getLaunchesByStatus_ShouldReturnFilteredMappedList() {
         // Given
         String status = "success";
         List<LaunchModel> launches = Arrays.asList(launchModel);
         List<LaunchSummaryResponse> expectedResponses = Arrays.asList(launchSummaryResponse);
-        
+
         when(useCasePort.getLaunchesByStatus(status)).thenReturn(launches);
         when(mapper.toSummaryResponseList(launches)).thenReturn(expectedResponses);
 
@@ -142,7 +143,7 @@ class LaunchServiceImplTest {
         String rocketId = "rocket1";
         List<LaunchModel> launches = Arrays.asList(launchModel);
         List<LaunchSummaryResponse> expectedResponses = Arrays.asList(launchSummaryResponse);
-        
+
         when(useCasePort.getLaunchesByRocket(rocketId)).thenReturn(launches);
         when(mapper.toSummaryResponseList(launches)).thenReturn(expectedResponses);
 
@@ -156,157 +157,39 @@ class LaunchServiceImplTest {
     }
 
     @Test
-    void getSuccessfulLaunches_ShouldReturnMappedSuccessfulLaunches() {
+    void getLaunchStats_ShouldReturnCorrectStats() {
         // Given
-        List<LaunchModel> launches = Arrays.asList(launchModel);
-        List<LaunchSummaryResponse> expectedResponses = Arrays.asList(launchSummaryResponse);
-        
-        when(useCasePort.getSuccessfulLaunches()).thenReturn(launches);
-        when(mapper.toSummaryResponseList(launches)).thenReturn(expectedResponses);
+        LaunchSummaryResponse successfulLaunch = LaunchSummaryResponse.builder().status("success").build();
+        LaunchSummaryResponse failedLaunch = LaunchSummaryResponse.builder().status("failed").build();
+        LaunchSummaryResponse upcomingLaunch = LaunchSummaryResponse.builder().status("upcoming").build();
+        List<LaunchSummaryResponse> allLaunches = Arrays.asList(successfulLaunch, successfulLaunch, failedLaunch, upcomingLaunch);
+
+        when(launchService.getAllLaunches()).thenReturn(allLaunches);
 
         // When
-        List<LaunchSummaryResponse> result = launchService.getSuccessfulLaunches();
+        StatsDataResponse result = launchService.getLaunchStats();
 
         // Then
-        assertEquals(expectedResponses, result);
-        verify(useCasePort).getSuccessfulLaunches();
-        verify(mapper).toSummaryResponseList(launches);
+        assertEquals(4, result.getTotalLaunches());
+        assertEquals(2, result.getSuccessfulLaunches());
+        assertEquals(1, result.getFailedLaunches());
+        assertEquals(1, result.getUpcomingLaunches());
+        assertEquals(50.0, result.getSuccessRate(), 0.01);
     }
 
     @Test
-    void getFailedLaunches_ShouldReturnMappedFailedLaunches() {
+    void getLaunchStats_WhenNoLaunches_ShouldReturnZeroStats() {
         // Given
-        LaunchModel failedLaunch = LaunchModel.builder()
-                .launchId("2")
-                .missionName("Failed Mission")
-                .status("failed")
-                .success(false)
-                .build();
-        
-        List<LaunchModel> launches = Arrays.asList(failedLaunch);
-        LaunchSummaryResponse failedResponse = LaunchSummaryResponse.builder()
-                .launchId("2")
-                .missionName("Failed Mission")
-                .status("failed")
-                .build();
-        List<LaunchSummaryResponse> expectedResponses = Arrays.asList(failedResponse);
-        
-        when(useCasePort.getFailedLaunches()).thenReturn(launches);
-        when(mapper.toSummaryResponseList(launches)).thenReturn(expectedResponses);
+        when(launchService.getAllLaunches()).thenReturn(Collections.emptyList());
 
         // When
-        List<LaunchSummaryResponse> result = launchService.getFailedLaunches();
+        StatsDataResponse result = launchService.getLaunchStats();
 
         // Then
-        assertEquals(expectedResponses, result);
-        verify(useCasePort).getFailedLaunches();
-        verify(mapper).toSummaryResponseList(launches);
-    }
-
-    @Test
-    void getTotalLaunchesCount_ShouldReturnCorrectCount() {
-        // Given
-        List<LaunchModel> launches = Arrays.asList(launchModel, launchModel, launchModel);
-        when(useCasePort.getAllLaunches()).thenReturn(launches);
-
-        // When
-        long result = launchService.getTotalLaunchesCount();
-
-        // Then
-        assertEquals(3, result);
-        verify(useCasePort).getAllLaunches();
-    }
-
-    @Test
-    void getTotalLaunchesCount_WhenNoLaunches_ShouldReturnZero() {
-        // Given
-        when(useCasePort.getAllLaunches()).thenReturn(Collections.emptyList());
-
-        // When
-        long result = launchService.getTotalLaunchesCount();
-
-        // Then
-        assertEquals(0, result);
-        verify(useCasePort).getAllLaunches();
-    }
-
-    @Test
-    void getSuccessRate_WithSuccessfulLaunches_ShouldReturnCorrectPercentage() {
-        // Given
-        LaunchSummaryResponse successfulLaunch = LaunchSummaryResponse.builder()
-                .status("success")
-                .build();
-        LaunchSummaryResponse failedLaunch = LaunchSummaryResponse.builder()
-                .status("failed")
-                .build();
-        
-        List<LaunchSummaryResponse> allLaunches = Arrays.asList(successfulLaunch, failedLaunch, successfulLaunch);
-        
-        // Mock the getAllLaunches method call within getSuccessRate
-        LaunchServiceImpl spyService = spy(launchService);
-        doReturn(allLaunches).when(spyService).getAllLaunches();
-
-        // When
-        double result = spyService.getSuccessRate();
-
-        // Then
-        assertEquals(66.66666666666667, result, 0.001);
-    }
-
-    @Test
-    void getSuccessRate_WithNoLaunches_ShouldReturnZero() {
-        // Given
-        LaunchServiceImpl spyService = spy(launchService);
-        doReturn(Collections.emptyList()).when(spyService).getAllLaunches();
-
-        // When
-        double result = spyService.getSuccessRate();
-
-        // Then
-        assertEquals(0.0, result);
-    }
-
-    @Test
-    void getSuccessRate_WithAllSuccessfulLaunches_ShouldReturnHundredPercent() {
-        // Given
-        LaunchSummaryResponse successfulLaunch1 = LaunchSummaryResponse.builder()
-                .status("success")
-                .build();
-        LaunchSummaryResponse successfulLaunch2 = LaunchSummaryResponse.builder()
-                .status("success")
-                .build();
-        
-        List<LaunchSummaryResponse> allLaunches = Arrays.asList(successfulLaunch1, successfulLaunch2);
-        
-        LaunchServiceImpl spyService = spy(launchService);
-        doReturn(allLaunches).when(spyService).getAllLaunches();
-
-        // When
-        double result = spyService.getSuccessRate();
-
-        // Then
-        assertEquals(100.0, result);
-    }
-
-    @Test
-    void getSuccessRate_WithAllFailedLaunches_ShouldReturnZeroPercent() {
-        // Given
-        LaunchSummaryResponse failedLaunch1 = LaunchSummaryResponse.builder()
-                .status("failed")
-                .build();
-        LaunchSummaryResponse failedLaunch2 = LaunchSummaryResponse.builder()
-                .status("partial_failure")
-                .build();
-        
-        List<LaunchSummaryResponse> allLaunches = Arrays.asList(failedLaunch1, failedLaunch2);
-        
-        LaunchServiceImpl spyService = spy(launchService);
-        doReturn(allLaunches).when(spyService).getAllLaunches();
-
-        // When
-        double result = spyService.getSuccessRate();
-
-        // Then
-        assertEquals(0.0, result);
+        assertEquals(0, result.getTotalLaunches());
+        assertEquals(0, result.getSuccessfulLaunches());
+        assertEquals(0, result.getFailedLaunches());
+        assertEquals(0, result.getUpcomingLaunches());
+        assertEquals(0.0, result.getSuccessRate(), 0.01);
     }
 }

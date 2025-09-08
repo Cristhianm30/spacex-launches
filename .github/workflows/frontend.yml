@@ -4,6 +4,10 @@ name: Frontend CI/CD
 on:
   push:
     branches: ["develop"]
+    paths:
+      - "spacex-launches-front/**"
+      - ".github/workflows/frontend.yml"
+
 
 jobs:
   deploy-frontend:

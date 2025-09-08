@@ -67,7 +67,7 @@ Definidas en `template.yaml`:
 
 ### Ejecutar tests
 
-Desde `lambda/`:
+Desde `spacex-launches-lambda/`:
 
 `pytest -v tests`
 

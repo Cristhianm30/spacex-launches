@@ -1,0 +1,39 @@
+<!-- Breadcrumb Navigation -->
+<nav class="breadcrumb-nav" [class.desktop-visible]="showOnDesktop" aria-label="Breadcrumb">
+  <ol class="flex items-center space-x-2 text-sm text-gray-600 dark:text-neutral-400">
+    @for (item of items; track $index) {
+      <li class="flex items-center">
+        @if ($index > 0) {
+          <!-- Separator -->
+          <svg class="w-4 h-4 mx-2 text-gray-400 dark:text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        }
+        
+        @if (item.route && !item.active) {
+          <!-- Clickable breadcrumb item -->
+          <a [routerLink]="item.route" 
+             class="flex items-center hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+            @if (item.icon) {
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="item.icon"/>
+              </svg>
+            }
+            {{ item.label }}
+          </a>
+        } @else {
+          <!-- Active/non-clickable breadcrumb item -->
+          <span class="flex items-center" 
+                [class]="item.active ? 'text-gray-900 dark:text-neutral-100 font-medium' : ''">
+            @if (item.icon) {
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="item.icon"/>
+              </svg>
+            }
+            {{ item.label }}
+          </span>
+        }
+      </li>
+    }
+  </ol>
+</nav>

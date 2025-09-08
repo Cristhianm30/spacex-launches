@@ -44,6 +44,15 @@ export interface StatsDataResponse {
   upcomingLaunches: number;
 }
 
+export interface Page<T> {
+  content: T[];
+  number: number;
+  size: number;
+  totalElements: number;
+}
+
+export interface LaunchPageResponse extends Page<LaunchSummaryResponse> {}
+
 // API Response wrapper (if needed)
 export interface ApiResponse<T> {
   data: T;

@@ -8,11 +8,6 @@ on:
       - "spacex-launches-front/**"
       - ".github/workflows/frontend.yml"
 
-  pull_request:
-    branches: ["develop"]
-    paths:
-      - "spacex-launches-front/**"
-      - ".github/workflows/frontend.yml"
 
 jobs:
   deploy-frontend:

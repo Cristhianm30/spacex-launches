@@ -69,7 +69,7 @@ Para que los workflows funcionen, se deben configurar estos **GitHub Secrets**:
 - `AWS_ACCESS_KEY_ID` → credenciales IAM con permisos para ECR, ECS y Lambda.
 - `AWS_SECRET_ACCESS_KEY`
 - `AWS_REGION` → ej. `us-east-1`
-- `ECR_REGISTRY` → ej. `944688893944.dkr.ecr.us-east-1.amazonaws.com`
+- `ECR_REGISTRY` → ej. `94468.dkr.ecr.us-east-1.amazonaws.com`
 - `ECS_CLUSTER` → nombre del cluster ECS (ej. `spacex-launches-cluster`)
 - `ECS_SERVICE_FRONT` → nombre del Service ECS del frontend (ej. `spacex-launches-frontend-service`)
 - `ECS_SERVICE_BACK` → nombre del Service ECS del backend (ej. `spacex-launches-backend-service`)
@@ -85,14 +85,6 @@ Para que los workflows funcionen, se deben configurar estos **GitHub Secrets**:
 
 Cada push a `main` o `develop` en la carpeta correspondiente dispara el pipeline y actualiza el servicio o función automáticamente.
 
----
-
-## 📖 Referencias útiles
-
-- [GitHub Actions Docs](https://docs.github.com/en/actions)
-- [Amazon ECS Developer Guide](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/Welcome.html)
-- [Amazon Lambda Docs](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html)
-- [Amazon ECR Docs](https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html)
 
 ---
 

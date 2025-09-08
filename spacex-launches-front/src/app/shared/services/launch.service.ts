@@ -8,7 +8,7 @@ import { LaunchSummaryResponse, LaunchResponse, StatsDataResponse, LaunchPageRes
   providedIn: 'root'
 })
 export class LaunchService {
-  private readonly baseUrl = 'https://fwit88xlf0.execute-api.us-east-1.amazonaws.com/prod/api';
+  private readonly baseUrl = 'https://fwit88xlf0.execute-api.us-east-1.amazonaws.com/api';
 
   constructor(private http: HttpClient) {}
 

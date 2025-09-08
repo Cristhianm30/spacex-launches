@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, throwError, forkJoin } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
-import { LaunchSummaryResponse, LaunchResponse, StatsDataResponse } from '../models/launch.models';
+import { catchError, map, switchMap, retry } from 'rxjs/operators';
+import { LaunchSummaryResponse, LaunchResponse, StatsDataResponse, LaunchPageResponse } from '../models/launch.models';
 
 @Injectable({
   providedIn: 'root'
@@ -80,6 +80,43 @@ export class LaunchService {
    */
   getLaunchStatistics(): Observable<StatsDataResponse> {
     return this.getStats();
+  }
+
+  /**
+   * Get paginated launches
+   */
+  getPaginatedLaunches(pageNumber: number, pageSize: number, status?: string): Observable<LaunchPageResponse> {
+    console.log('Getting paginated launches with:', { pageNumber, pageSize, status });
+    
+    // Since /launches/paginated doesn't exist, we'll use /launches and simulate pagination
+    return this.getAllLaunches().pipe(
+      map(launches => {
+        // Filter by status if provided
+        let filteredLaunches = launches;
+        if (status) {
+          filteredLaunches = launches.filter(launch => 
+            launch.status.toUpperCase() === status.toUpperCase()
+          );
+        }
+        
+        // Calculate pagination
+        const startIndex = pageNumber * pageSize;
+        const endIndex = startIndex + pageSize;
+        const paginatedContent = filteredLaunches.slice(startIndex, endIndex);
+        
+        // Create paginated response
+        const response: LaunchPageResponse = {
+          content: paginatedContent,
+          number: pageNumber,
+          size: pageSize,
+          totalElements: filteredLaunches.length
+        };
+        
+        console.log('Simulated pagination response:', response);
+        return response;
+      }),
+      catchError(this.handleError)
+    );
   }
 
   /**

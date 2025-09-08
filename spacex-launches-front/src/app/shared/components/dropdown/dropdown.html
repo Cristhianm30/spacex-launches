@@ -1,0 +1,64 @@
+<!-- Dropdown Component -->
+<div class="dropdown-container" [class]="'dropdown-' + size">
+  <!-- Dropdown Button -->
+  <button
+    type="button"
+    (click)="toggleDropdown()"
+    [disabled]="disabled"
+    class="dropdown-button"
+    [class.open]="isOpen"
+    [class.disabled]="disabled"
+  >
+    <span class="dropdown-label">{{ getSelectedLabel() }}</span>
+    
+    <!-- Chevron Icon -->
+    <svg class="dropdown-chevron" [class.rotate]="isOpen" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+    </svg>
+  </button>
+
+  <!-- Dropdown Menu -->
+  @if (isOpen) {
+    <div class="dropdown-menu">
+      @if (showSearch) {
+        <!-- Search Input -->
+        <div class="dropdown-search">
+          <input
+            type="text"
+            placeholder="Search options..."
+            [value]="searchTerm"
+            (input)="onSearchInput($event)"
+            class="dropdown-search-input"
+          />
+        </div>
+      }
+
+      <!-- Options List -->
+      <div class="dropdown-options">
+        @for (option of filteredOptions; track option.value) {
+          <button
+            type="button"
+            (click)="selectOption(option)"
+            [disabled]="option.disabled"
+            class="dropdown-option"
+            [class.selected]="option.value === selectedValue"
+            [class.disabled]="option.disabled"
+          >
+            @if (option.icon) {
+              <svg class="dropdown-option-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="option.icon"/>
+              </svg>
+            }
+            <span>{{ option.label }}</span>
+          </button>
+        }
+
+        @if (filteredOptions.length === 0) {
+          <div class="dropdown-no-options">
+            No options found
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

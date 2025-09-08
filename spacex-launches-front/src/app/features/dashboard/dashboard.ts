@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LaunchService } from '../../shared/services/launch.service';
-import { LaunchSummaryResponse } from '../../shared/models/launch.models';
+import { LaunchSummaryResponse, LaunchPageResponse } from '../../shared/models/launch.models';
+import { LaunchCard } from '../../components/launch-card/launch-card';
+import { Dropdown, DropdownOption } from '../../shared/components/dropdown/dropdown';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule],
+  imports: [CommonModule, LaunchCard, Dropdown],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
@@ -49,9 +51,30 @@ export class Dashboard implements OnInit {
     }
   ];
 
+  // Recent launches data
   recentLaunches: LaunchSummaryResponse[] = [];
-  loading = true;
+
+  // Pagination properties
+  currentPage = 0;
+  pageSize = 9;
+  totalElements = 0;
+  totalPages = 0;
+  selectedStatus: string | undefined = undefined;
+  
+  // Dropdown options for status filter
+  statusOptions: DropdownOption[] = [
+    { value: undefined, label: 'All Status' },
+    { value: 'success', label: 'Success' },
+    { value: 'failed', label: 'Failed' },
+    { value: 'upcoming', label: 'Upcoming' }
+  ];
+
+  // Loading and error states
+  isLoading = false;
   error: string | null = null;
+  
+  // Helper for template
+  Math = Math;
 
   constructor(private launchService: LaunchService) { }
 
@@ -60,7 +83,7 @@ export class Dashboard implements OnInit {
   }
 
   private loadDashboardData(): void {
-    this.loading = true;
+    this.isLoading = true;
     this.error = null;
 
     // Load statistics
@@ -70,24 +93,14 @@ export class Dashboard implements OnInit {
         this.updateStats(statistics);
       },
       error: (error) => {
-        console.error('Error loading statistics:', error);
+        console.error('Error isLoading statistics:', error);
         this.error = 'Failed to load launch statistics';
-        this.loading = false;
+        this.isLoading = false;
       }
     });
 
-    // Load recent launches
-    this.launchService.getRecentLaunches(6).subscribe({
-      next: (launches) => {
-        this.recentLaunches = launches;
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading recent launches:', error);
-        this.error = 'Failed to load recent launches';
-        this.loading = false;
-      }
-    });
+    // Load paginated launches
+    this.loadPaginatedLaunches();
   }
 
   private updateStats(statistics: any): void {
@@ -130,6 +143,84 @@ export class Dashboard implements OnInit {
       }
     ];
     console.log('Stats updated to:', this.stats);
+  }
+
+  private loadPaginatedLaunches(): void {
+    console.log('Loading paginated launches with params:', {
+      page: this.currentPage,
+      size: this.pageSize,
+      status: this.selectedStatus
+    });
+    
+    this.launchService.getPaginatedLaunches(this.currentPage, this.pageSize, this.selectedStatus).subscribe({
+      next: (response: LaunchPageResponse) => {
+        console.log('Paginated launches response:', response);
+        this.recentLaunches = response.content;
+        this.totalElements = response.totalElements;
+        this.totalPages = Math.ceil(response.totalElements / response.size);
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading paginated launches:', error);
+        this.error = 'Failed to load launches';
+        this.isLoading = false;
+      }
+    });
+  }
+
+  // Pagination methods
+  goToPage(page: number): void {
+    if (page >= 0 && page < this.totalPages) {
+      this.currentPage = page;
+      this.isLoading = true;
+      this.loadPaginatedLaunches();
+    }
+  }
+
+  nextPage(): void {
+    this.goToPage(this.currentPage + 1);
+  }
+
+  previousPage(): void {
+    this.goToPage(this.currentPage - 1);
+  }
+
+  onStatusFilter(status: string | undefined): void {
+    console.log('Status filter changed to:', status);
+    this.selectedStatus = status;
+    this.currentPage = 0; // Reset to first page
+    this.isLoading = true;
+    console.log('Loading paginated launches with status:', this.selectedStatus);
+    this.loadPaginatedLaunches();
+  }
+
+  // Get visible page numbers for pagination
+  getVisiblePages(): number[] {
+    const maxVisiblePages = 5;
+    const pages: number[] = [];
+    
+    if (this.totalPages <= maxVisiblePages) {
+      // Show all pages if total is small
+      for (let i = 0; i < this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Smart pagination logic
+      const halfVisible = Math.floor(maxVisiblePages / 2);
+      let startPage = Math.max(0, this.currentPage - halfVisible);
+      let endPage = Math.min(this.totalPages - 1, startPage + maxVisiblePages - 1);
+      
+      // Adjust start if we're near the end
+      if (endPage - startPage < maxVisiblePages - 1) {
+        startPage = Math.max(0, endPage - maxVisiblePages + 1);
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+    }
+    
+    return pages;
   }
 
   refreshData(): void {

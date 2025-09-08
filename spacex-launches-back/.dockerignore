@@ -1,0 +1,113 @@
+# Archivos de compilación y dependencias
+target/
+build/
+out/
+bin/
+*.class
+*.jar
+*.war
+*.ear
+
+# Archivos de Maven
+.mvn/
+mvnw
+mvnw.cmd
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+# Archivos de Gradle
+.gradle/
+gradle/
+gradlew
+gradlew.bat
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+.metadata/
+.recommenders/
+
+# Logs
+*.log
+logs/
+
+# Archivos temporales
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Archivos de sistema operativo
+Thumbs.db
+.DS_Store
+*.pid
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Documentación y README
+README.md
+*.md
+docs/
+documentation/
+
+# Archivos de configuración del entorno de desarrollo
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+application-local.yml
+application-local.properties
+application-dev.yml
+application-dev.properties
+
+# Archivos de testing
+test-results/
+coverage/
+jacoco/
+*.coveragexml
+
+# Node modules (si usas frontend con Node.js)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos de Spring Boot DevTools
+.spring-boot-devtools.properties
+
+# Archivos de base de datos local
+*.db
+*.sqlite
+*.sqlite3
+h2/
+
+# Certificados y claves
+*.pem
+*.key
+*.crt
+*.jks
+*.p12

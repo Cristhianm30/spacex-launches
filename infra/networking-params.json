@@ -1,0 +1,14 @@
+[
+  {
+    "ParameterKey": "VpcId",
+    "ParameterValue": "vpc-00a160..."
+  },
+  {
+    "ParameterKey": "Subnets",
+    "ParameterValue": "subnet-01957...,subnet-05271..."
+  },
+  {
+    "ParameterKey": "ProjectName",
+    "ParameterValue": "spacex-launches"
+  }
+]

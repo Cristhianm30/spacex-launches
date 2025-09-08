@@ -1,5 +1,5 @@
 server:
-  port: ${SERVER_PORT}
+  port: 8080
 
 spring:
   config:
@@ -11,13 +11,8 @@ springdoc:
     enabled: true
 
 aws:
-  region: ${AWS_REGION}
   access : ${AWS_ACCESS_KEY_ID}
   secret : ${AWS_SECRET_ACCESS_KEY}
-
-  dynamodb:
-    table-name: ${DYNAMODB_TABLE_NAME}
-    endpoint: ${DYNAMODB_ENDPOINT}
 
 
 logging:

@@ -2,7 +2,7 @@ name: Backend CI/CD
 
 on:
   push:
-    branches: ["develop"]
+    branches: [ "main", "develop" ]
     paths:
       - "spacex-launches-back/**"
       - ".github/workflows/backend.yml"
@@ -12,11 +12,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Descargar el repo
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Configurar JDK
       - name: Setup JDK
         uses: actions/setup-java@v4
         with:
@@ -30,7 +28,6 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x spacex-launches-back/gradlew
 
-      # 3. Ejecutar pruebas y cobertura
       - name: Run unit tests (JaCoCo)
         run: |
           cd spacex-launches-back
@@ -50,16 +47,12 @@ jobs:
           name: backend-coverage-report
           path: spacex-launches-back/build/reports/jacoco/test/html
 
-      # 4. Construir imagen Docker
       - name: Build Docker image
         run: |
-          IMAGE_SHA=${{ secrets.ECR_REGISTRY }}/spacex-launches-back:${{ github.sha }}
-          IMAGE_LATEST=${{ secrets.ECR_REGISTRY }}/spacex-launches-back:latest
-          docker build -t $IMAGE_SHA -t $IMAGE_LATEST spacex-launches-back
-          echo "IMAGE_SHA=$IMAGE_SHA" >> $GITHUB_ENV
-          echo "IMAGE_LATEST=$IMAGE_LATEST" >> $GITHUB_ENV
+          IMAGE=${{ secrets.ECR_REGISTRY }}/spacex-launches-back:latest
+          docker build -t $IMAGE spacex-launches-back
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
-      # 5. Configurar credenciales AWS
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -70,36 +63,9 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Push Docker images
-        run: |
-          docker push $IMAGE_SHA
-          docker push $IMAGE_LATEST
+      - name: Push Docker image
+        run: docker push $IMAGE
 
-      # 6. Registrar nueva task definition
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
-
-      - name: Register new task definition
-        run: |
-          FAMILY="spacex-launches-backend-task"
-          IMAGE=$IMAGE_SHA
-
-          aws ecs describe-task-definition \
-            --task-definition $FAMILY \
-            --query taskDefinition \
-            --region ${{ secrets.AWS_REGION }} \
-            > task-def.json
-
-          cat task-def.json \
-            | jq '.containerDefinitions[0].image = "'$IMAGE'"' \
-            | jq '{containerDefinitions, family, executionRoleArn, taskRoleArn, networkMode, requiresCompatibilities, cpu, memory}' \
-            > new-task-def.json
-
-          aws ecs register-task-definition \
-            --cli-input-json file://new-task-def.json \
-            --region ${{ secrets.AWS_REGION }}
-
-      # 7. Actualizar ECS Service
       - name: Update ECS Service
         run: |
           aws ecs update-service \

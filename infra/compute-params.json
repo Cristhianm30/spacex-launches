@@ -1,0 +1,22 @@
+[
+  {
+    "ParameterKey": "VpcId",
+    "ParameterValue": "REMOVED..."
+  },
+  {
+    "ParameterKey": "Subnets",
+    "ParameterValue": "REMOVED...,REMOVED..."
+  },
+  {
+    "ParameterKey": "ProjectName",
+    "ParameterValue": "spacex-launches"
+  },
+  {
+    "ParameterKey": "BackendImageTag",
+    "ParameterValue": "latest"
+  },
+  {
+    "ParameterKey": "FrontendImageTag",
+    "ParameterValue": "latest"
+  }
+]

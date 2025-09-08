@@ -41,11 +41,11 @@ lambda/
 
 ### Deploy
 
-`sam build sam deploy --profile spacex`
+`sam build sam deploy `
 
 Si es la primera vez:
 
-`sam deploy --guided --profile spacex`
+`sam deploy --guided `
 
 ---
 

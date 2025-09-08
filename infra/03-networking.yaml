@@ -1,0 +1,271 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Networking infrastructure for SpaceX Launches - ALB, Target Groups, API Gateway
+
+Parameters:
+  VpcId:
+    Type: String
+    Description: VPC ID where resources will be created
+  Subnets:
+    Type: List<String>
+    Description: List of subnet IDs for ALB
+  ProjectName:
+    Type: String
+    Default: spacex-launches
+    Description: Project name for resource naming and tagging
+
+Resources:
+  # --- Application Load Balancer ---
+  ApplicationLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub "${ProjectName}-alb"
+      Scheme: internet-facing
+      Type: application
+      IpAddressType: ipv4
+      Subnets: !Ref Subnets
+      SecurityGroups:
+        - Fn::ImportValue: !Sub "${ProjectName}-ALBSecurityGroupId"
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectName}-alb"
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Owner
+          Value: Cristhian Moreno
+        - Key: Environment
+          Value: prod
+
+  # --- Target Groups ---
+  BackendTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub "${ProjectName}-backend-tg"
+      VpcId: !Ref VpcId
+      Protocol: HTTP
+      Port: 8080
+      TargetType: ip
+      HealthCheckEnabled: true
+      HealthCheckPath: /api/actuator/health
+      HealthCheckProtocol: HTTP
+      HealthCheckPort: traffic-port
+      HealthCheckIntervalSeconds: 30
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 3
+      Matcher:
+        HttpCode: 200
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 30
+        - Key: stickiness.enabled
+          Value: false
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectName}-backend-tg"
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Owner
+          Value: Cristhian Moreno
+        - Key: Environment
+          Value: prod
+
+  FrontendTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub "${ProjectName}-frontend-tg"
+      VpcId: !Ref VpcId
+      Protocol: HTTP
+      Port: 80
+      TargetType: ip
+      HealthCheckEnabled: true
+      HealthCheckPath: /health
+      HealthCheckProtocol: HTTP
+      HealthCheckPort: traffic-port
+      HealthCheckIntervalSeconds: 30
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 3
+      Matcher:
+        HttpCode: 200
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 30
+        - Key: stickiness.enabled
+          Value: false
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectName}-frontend-tg"
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Owner
+          Value: Cristhian Moreno
+        - Key: Environment
+          Value: prod
+
+  # --- ALB Listeners ---
+  ALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref FrontendTargetGroup
+
+  # --- Listener Rules ---
+  BackendListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref ALBListener
+      Priority: 100
+      Conditions:
+        - Field: path-pattern
+          PathPatternConfig:
+            Values:
+              - "/api/*"
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref BackendTargetGroup
+
+  HealthCheckListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref ALBListener
+      Priority: 200
+      Conditions:
+        - Field: path-pattern
+          PathPatternConfig:
+            Values:
+              - "/health"
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref FrontendTargetGroup
+
+  # --- API Gateway (REST API v1) ---
+  ApiGatewayRest:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub "${ProjectName}-rest-api"
+      Description: REST API for SpaceX Launches
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+
+  # Resource /api
+  ApiGatewayResourceApi:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt ApiGatewayRest.RootResourceId
+      PathPart: api
+      RestApiId: !Ref ApiGatewayRest
+
+  # ANY /api/{proxy+}
+  ApiGatewayResourceApiProxy:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !Ref ApiGatewayResourceApi
+      PathPart: "{proxy+}"
+      RestApiId: !Ref ApiGatewayRest
+
+  ApiGatewayMethodApiProxy:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRest
+      ResourceId: !Ref ApiGatewayResourceApiProxy
+      HttpMethod: ANY
+      AuthorizationType: NONE
+      RequestParameters:
+        method.request.path.proxy: true
+      Integration:
+        Type: HTTP_PROXY
+        IntegrationHttpMethod: ANY
+        Uri: !Sub "http://${ApplicationLoadBalancer.DNSName}/api/{proxy}"
+        RequestParameters:
+          integration.request.path.proxy: "method.request.path.proxy"
+
+  # Root proxy (para frontend)
+  ApiGatewayResourceRootProxy:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt ApiGatewayRest.RootResourceId
+      PathPart: "{proxy+}"
+      RestApiId: !Ref ApiGatewayRest
+
+  ApiGatewayMethodRootProxy:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRest
+      ResourceId: !Ref ApiGatewayResourceRootProxy
+      HttpMethod: ANY
+      AuthorizationType: NONE
+      RequestParameters:
+        method.request.path.proxy: true
+      Integration:
+        Type: HTTP_PROXY
+        IntegrationHttpMethod: ANY
+        Uri: !Sub "http://${ApplicationLoadBalancer.DNSName}/{proxy}"
+        RequestParameters:
+          integration.request.path.proxy: "method.request.path.proxy"
+
+  ApiGatewayMethodRoot:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRest
+      ResourceId: !GetAtt ApiGatewayRest.RootResourceId
+      HttpMethod: ANY
+      AuthorizationType: NONE
+      Integration:
+        Type: HTTP_PROXY
+        IntegrationHttpMethod: ANY
+        Uri: !Sub "http://${ApplicationLoadBalancer.DNSName}"
+
+  ApiGatewayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref ApiGatewayRest
+      StageName: prod
+      Description: Production stage
+    DependsOn:
+      - ApiGatewayMethodRoot
+      - ApiGatewayMethodRootProxy
+      - ApiGatewayMethodApiProxy
+
+  # --- CloudWatch Log Group for API Gateway ---
+  ApiGatewayLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/apigateway/${ProjectName}"
+      RetentionInDays: 14
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Owner
+          Value: Cristhian Moreno
+        - Key: Environment
+          Value: prod
+
+Outputs:
+  ApplicationLoadBalancerArn:
+    Description: ARN of the Application Load Balancer
+    Value: !Ref ApplicationLoadBalancer
+    Export:
+      Name: !Sub "${ProjectName}-ALBArn"
+
+  ApplicationLoadBalancerDnsName:
+    Description: DNS name of the Application Load Balancer
+    Value: !GetAtt ApplicationLoadBalancer.DNSName
+    Export:
+      Name: !Sub "${ProjectName}-ALBDnsName"
+
+  BackendTargetGroupArn:
+    Description: ARN of the Backend Target Group
+    Value: !Ref BackendTargetGroup
+    Export:
+      Name: !Sub "${ProjectName}-BackendTargetGroupArn"
+
+  FrontendTargetGroupArn:
+    Description: ARN of the Frontend Target Group
+    Value: !Ref FrontendTargetGroup
+    Export:
+      Name: !Sub "${ProjectName}-FrontendTargetGroupArn"

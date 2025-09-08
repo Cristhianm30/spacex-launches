@@ -1,0 +1,14 @@
+[
+  {
+    "ParameterKey": "VpcId",
+    "ParameterValue": "REMOVED..."
+  },
+  {
+    "ParameterKey": "Subnets",
+    "ParameterValue": "REMOVED...,REMOVED..."
+  },
+  {
+    "ParameterKey": "ProjectName",
+    "ParameterValue": "spacex-launches"
+  }
+]

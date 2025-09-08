@@ -28,6 +28,12 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x spacex-launches-back/gradlew
 
+      - name: Build Spring Boot app
+        run: |
+            cd spacex-launches-back
+            ./gradlew clean build -x test --no-daemon
+
+
       - name: Run unit tests (JaCoCo)
         run: |
           cd spacex-launches-back

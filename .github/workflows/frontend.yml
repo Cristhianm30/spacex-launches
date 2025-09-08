@@ -8,7 +8,6 @@ on:
       - "spacex-launches-front/**"
       - ".github/workflows/frontend.yml"
 
-
 jobs:
   deploy-frontend:
     runs-on: ubuntu-latest
@@ -29,6 +28,11 @@ jobs:
         run: |
           cd spacex-launches-front
           npm ci
+
+      - name: Build Angular app
+        run: |
+          cd spacex-launches-front
+          npm run build -- --configuration production
 
       # 4. Ejecutar pruebas
       - name: Run tests

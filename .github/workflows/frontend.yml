@@ -1,0 +1,55 @@
+name: Frontend CI/CD
+
+# Se ejecuta cuando haces push a la rama main
+on:
+  push:
+    branches: [ "develop" ]
+
+jobs:
+  deploy-frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Descargar código
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Instalar Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # 3. Instalar dependencias
+      - name: Install dependencies
+        run: |
+          cd spacex-launches-front
+          npm ci
+
+      # 4. Ejecutar pruebas
+      - name: Run tests
+        run: |
+          cd spacex-launches-front
+          npm test -- --watchAll=false
+
+      # 5. Build Docker image
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ secrets.ECR_REGISTRY }}/spacex-front:latest spacex-launches-front
+
+      # 6. Login a Amazon ECR
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # 7. Push Docker image
+      - name: Push Docker image
+        run: docker push ${{ secrets.ECR_REGISTRY }}/spacex-front:latest
+
+      # 8. Update ECS Service
+      - name: Update ECS Service
+        run: |
+          aws ecs update-service \
+            --cluster ${{ secrets.ECS_CLUSTER }} \
+            --service ${{ secrets.ECS_SERVICE_FRONT }} \
+            --force-new-deployment \
+            --region ${{ secrets.AWS_REGION }}

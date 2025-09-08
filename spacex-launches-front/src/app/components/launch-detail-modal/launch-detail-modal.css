@@ -1,0 +1,97 @@
+/* Modal animations */
+.modal-enter {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.modal-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 300ms ease-out, transform 300ms ease-out;
+}
+
+.modal-exit {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.modal-exit-active {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 200ms ease-in, transform 200ms ease-in;
+}
+
+/* Custom scrollbar for modal content */
+.modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Dark mode scrollbar */
+.dark .modal-content::-webkit-scrollbar-track {
+  background: #374151;
+}
+
+.dark .modal-content::-webkit-scrollbar-thumb {
+  background: #6b7280;
+}
+
+.dark .modal-content::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Loading animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Link hover effects */
+a {
+  transition: color 0.2s ease-in-out;
+}
+
+/* Image loading state */
+img {
+  transition: opacity 0.3s ease-in-out;
+}
+
+img:not([src]) {
+  opacity: 0;
+}
+
+/* Status badge animations */
+.status-badge {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Modal backdrop blur effect */
+.modal-backdrop {
+  backdrop-filter: blur(4px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .modal-panel {
+    margin: 0;
+    border-radius: 0;
+    min-height: 100vh;
+  }
+}

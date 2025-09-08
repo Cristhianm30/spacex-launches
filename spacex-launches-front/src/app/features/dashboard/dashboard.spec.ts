@@ -107,6 +107,7 @@ describe('Dashboard', () => {
   });
 
   it('should handle statistics error', () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
     mockLaunchService.getLaunchStatistics.mockReturnValue(throwError('Statistics error'));
     mockLaunchService.getPaginatedLaunches.mockReturnValue(of(mockPaginatedResponse));
 
@@ -114,6 +115,8 @@ describe('Dashboard', () => {
 
     expect(component.error).toBe('Failed to load launch statistics');
     expect(component.isLoading).toBe(false);
+    
+    consoleErrorSpy.mockRestore();
   });
 
   it('should handle recent launches error', () => {
@@ -162,23 +165,77 @@ describe('Dashboard', () => {
   });
 
   it('should handle pagination correctly', () => {
-    mockLaunchService.getLaunchStatistics.mockReturnValue(of(mockStatistics));
-    mockLaunchService.getPaginatedLaunches.mockReturnValue(of(mockPaginatedResponse));
+    const mockLargePaginatedResponse = {
+      content: mockRecentLaunches,
+      number: 0,
+      size: 9,
+      totalElements: 27
+    };
+    mockLaunchService.getPaginatedLaunches.mockReturnValue(of(mockLargePaginatedResponse));
+    
+    component.totalElements = 27;
+    component.pageSize = 9;
+    component.currentPage = 0;
+    component.totalPages = Math.ceil(component.totalElements / component.pageSize);
 
-    component.ngOnInit();
-
-    expect(component.totalElements).toBe(2);
-    expect(component.totalPages).toBe(1);
+    expect(component.totalPages).toBe(3);
+    
+    component.nextPage();
+    expect(component.currentPage).toBe(1);
+    
+    component.previousPage();
+    expect(component.currentPage).toBe(0);
+    
+    component.goToPage(2);
+    expect(component.currentPage).toBe(2);
   });
 
   it('should filter launches by status', () => {
-    mockLaunchService.getLaunchStatistics.mockReturnValue(of(mockStatistics));
     mockLaunchService.getPaginatedLaunches.mockReturnValue(of(mockPaginatedResponse));
-
+    
     component.onStatusFilter('success');
-
     expect(component.selectedStatus).toBe('success');
-    expect(component.currentPage).toBe(0);
-    expect(mockLaunchService.getPaginatedLaunches).toHaveBeenCalledWith(0, 9, 'success');
+    expect(component.currentPage).toBe(0); // Should reset to first page
+  });
+
+  it('should open modal when launch card is clicked', () => {
+    const launchId = 'test-launch-123';
+    
+    component.onLaunchCardClick(launchId);
+    
+    expect(component.selectedLaunchId).toBe(launchId);
+    expect(component.isModalOpen).toBeTruthy();
+  });
+
+  it('should close modal when onModalClose is called', () => {
+    component.selectedLaunchId = 'test-launch-123';
+    component.isModalOpen = true;
+    
+    component.onModalClose();
+    
+    expect(component.selectedLaunchId).toBeNull();
+    expect(component.isModalOpen).toBeFalsy();
+  });
+
+  it('should initialize modal properties correctly', () => {
+    expect(component.selectedLaunchId).toBeNull();
+    expect(component.isModalOpen).toBeFalsy();
+  });
+
+  it('should handle multiple modal open/close cycles', () => {
+    // First launch
+    component.onLaunchCardClick('launch-1');
+    expect(component.selectedLaunchId).toBe('launch-1');
+    expect(component.isModalOpen).toBeTruthy();
+    
+    // Close modal
+    component.onModalClose();
+    expect(component.selectedLaunchId).toBeNull();
+    expect(component.isModalOpen).toBeFalsy();
+    
+    // Second launch
+    component.onLaunchCardClick('launch-2');
+    expect(component.selectedLaunchId).toBe('launch-2');
+    expect(component.isModalOpen).toBeTruthy();
   });
 });

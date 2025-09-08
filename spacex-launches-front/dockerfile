@@ -7,8 +7,7 @@ RUN npm ci
 
 COPY . .
 # Produce dist/spacex-launches-front/browser (según tu angular.json)
-RUN npm run build --base-href="/prod/" --deploy-url="/prod/"
-
+RUN npm run build -- --base-href="/prod/"
 # --- Runtime (Nginx) ---
 FROM nginx:1.27-alpine
 

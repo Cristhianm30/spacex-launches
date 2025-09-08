@@ -1,6 +1,8 @@
 package io.github.cristhianm30.spacex_launches_back.infrastructure.persistence;
 
 import io.github.cristhianm30.spacex_launches_back.domain.model.LaunchModel;
+import io.github.cristhianm30.spacex_launches_back.domain.model.Page;
+import io.github.cristhianm30.spacex_launches_back.domain.model.Pageable;
 import io.github.cristhianm30.spacex_launches_back.domain.port.out.LaunchRepositoryPort;
 import io.github.cristhianm30.spacex_launches_back.infrastructure.entity.LaunchEntity;
 import io.github.cristhianm30.spacex_launches_back.infrastructure.mapper.LaunchEntityMapper;
@@ -13,6 +15,7 @@ import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository
 public class DynamoDbLaunchRepository implements LaunchRepositoryPort {
@@ -40,6 +43,22 @@ public class DynamoDbLaunchRepository implements LaunchRepositoryPort {
                 .stream()
                 .map(mapper::toDomain)
                 .toList();
+    }
+
+    @Override
+    public Page<LaunchModel> findAll(String status, Pageable pageable) {
+        List<LaunchModel> launches = findAll();
+
+        if (status != null && !status.isEmpty()) {
+            launches = launches.stream()
+                    .filter(launch -> status.equals(launch.getStatus()))
+                    .collect(Collectors.toList());
+        }
+
+        int start = pageable.getPageNumber() * pageable.getPageSize();
+        int end = Math.min((start + pageable.getPageSize()), launches.size());
+
+        return new Page<>(launches.subList(start, end), pageable.getPageNumber(), pageable.getPageSize(), launches.size());
     }
 
     @Override

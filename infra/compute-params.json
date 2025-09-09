@@ -1,11 +1,11 @@
 [
   {
     "ParameterKey": "VpcId",
-    "ParameterValue": "REMOVED..."
+    "ParameterValue": "vpc-00a160..."
   },
   {
     "ParameterKey": "Subnets",
-    "ParameterValue": "REMOVED...,REMOVED..."
+    "ParameterValue": "subnet-01957...,subnet-052712..."
   },
   {
     "ParameterKey": "ProjectName",

@@ -53,7 +53,7 @@ Antes de empezar, configura los siguientes archivos de parámetros:
 [
   {
     "ParameterKey": "VpcId",
-    "ParameterValue": "REMOVED"
+    "ParameterValue": "vpc-12345678"
   },
   {
     "ParameterKey": "ProjectName",
@@ -67,11 +67,11 @@ Antes de empezar, configura los siguientes archivos de parámetros:
 [
   {
     "ParameterKey": "VpcId",
-    "ParameterValue": "REMOVED"
+    "ParameterValue": "vpc-12345678"
   },
   {
     "ParameterKey": "Subnets",
-    "ParameterValue": "REMOVED,REMOVED"
+    "ParameterValue": "subnet-12345678,subnet-87654321"
   },
   {
     "ParameterKey": "ProjectName",
@@ -85,11 +85,11 @@ Antes de empezar, configura los siguientes archivos de parámetros:
 [
   {
     "ParameterKey": "VpcId",
-    "ParameterValue": "REMOVED"
+    "ParameterValue": "vpc-12345678"
   },
   {
     "ParameterKey": "Subnets",
-    "ParameterValue": "REMOVED,REMOVED"
+    "ParameterValue": "subnet-12345678,subnet-87654321"
   },
   {
     "ParameterKey": "ProjectName",

@@ -1,5 +1,7 @@
 package io.github.cristhianm30.spacex_launches_back.infrastructure.config;
 
+import io.github.cristhianm30.spacex_launches_back.domain.util.constant.ApiConstants;
+import io.github.cristhianm30.spacex_launches_back.domain.util.constant.CorsConstants;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
@@ -13,15 +15,15 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 @OpenAPIDefinition(
         info = @Info(
-                title = "SpaceX Launches API",
-                version = "v1",
-                description = "API para consultar lanzamientos SpaceX almacenados en DynamoDB",
-                contact = @Contact(name = "Cristhian Moreno", email = ""),
-                license = @License(name = "MIT")
+                title = ApiConstants.API_TITLE,
+                version = ApiConstants.API_VERSION,
+                description = ApiConstants.API_DESCRIPTION,
+                contact = @Contact(name = ApiConstants.CONTACT_NAME, email = ApiConstants.CONTACT_EMAIL),
+                license = @License(name = ApiConstants.LICENSE_NAME)
         ),
         servers = {
-                @Server(url = "/api", description = "Base path detrás de API Gateway o reverse proxy"),
-                @Server(url = "https://lbs33m5sf6.execute-api.us-east-1.amazonaws.com/prod", description = "Production")
+                @Server(url = ApiConstants.BASE_SERVER_URL, description = ApiConstants.BASE_SERVER_DESCRIPTION),
+                @Server(url = ApiConstants.PRODUCTION_SERVER_URL, description = ApiConstants.PRODUCTION_SERVER_DESCRIPTION)
         }
 )
 public class SwaggerConfig {
@@ -31,14 +33,14 @@ public class SwaggerConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/docs/**")
-                        .allowedOrigins("*")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*");
-                registry.addMapping("/swagger/**")
-                        .allowedOrigins("*")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*");
+                registry.addMapping(CorsConstants.DOCS_MAPPING)
+                        .allowedOrigins(CorsConstants.ALLOWED_ORIGINS)
+                        .allowedMethods(CorsConstants.ALLOWED_METHODS)
+                        .allowedHeaders(CorsConstants.ALLOWED_HEADERS);
+                registry.addMapping(CorsConstants.SWAGGER_UI_MAPPING)
+                        .allowedOrigins(CorsConstants.ALLOWED_ORIGINS)
+                        .allowedMethods(CorsConstants.ALLOWED_METHODS)
+                        .allowedHeaders(CorsConstants.ALLOWED_HEADERS);
             }
         };
     }

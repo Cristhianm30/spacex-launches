@@ -2,4 +2,4 @@ spring:
   application:
     name: spacex-launches-back
   profiles:
-    active: prod
+    active: local

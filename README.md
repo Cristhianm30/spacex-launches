@@ -120,9 +120,9 @@ spacex-launches/
 ## 🚀 URLs de la Aplicación
 
 ### Producción
-- **Frontend**: https://d3j8k2l9m4n5o6.cloudfront.net
+- **Frontend**: https://d3eq0c7gc5qw7o.cloudfront.net/
 - **API**: https://lbs33m5sf6.execute-api.us-east-1.amazonaws.com/prod/api
-- **Swagger UI**: https://lbs33m5sf6.execute-api.us-east-1.amazonaws.com/prod/api/swagger-ui
+- **Swagger UI**: https://lbs33m5sf6.execute-api.us-east-1.amazonaws.com/prod/api/swagger-ui/index.html
 
 ### Desarrollo Local
 - **Frontend**: http://localhost:4200

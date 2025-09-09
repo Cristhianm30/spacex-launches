@@ -16,7 +16,7 @@ Esta API proporciona endpoints para consultar datos históricos y estadísticas 
 - ✅ Estadísticas generales
 - ✅ Documentación Swagger/OpenAPI
 - ✅ CORS habilitado
-- ✅ Despliegue en AWS Lambda
+- ✅ Despliegue en ECS Fargate
 
 ## 🛠️ Tecnologías
 
@@ -34,8 +34,8 @@ Esta API proporciona endpoints para consultar datos históricos y estadísticas 
 
 La documentación interactiva de la API está disponible en:
 
-- **Local**: `http://localhost:8080/api/swagger`
-- **Producción**: `https://fwit88xlf0.execute-api.us-east-1.amazonaws.com/api/swagger`
+- **Local**: `http://localhost:8080/api/swagger-ui`
+- **Producción**: `https://lbs33m5sf6.execute-api.us-east-1.amazonaws.com/prod/api/swagger-ui`
 
 ## 🔗 Endpoints
 
@@ -64,17 +64,17 @@ La documentación interactiva de la API está disponible en:
 
 #### Obtener un lanzamiento específico
 ```bash
-curl -X GET "https://fwit88xlf0.execute-api.us-east-1.amazonaws.com/api/launches/5eb87cd9ffd86e000604b32a"
+curl -X GET "hhttps://lbs33m5sf6.execute-api.us-east-1.amazonaws.com/prod/api/launches/5eb87cd9ffd86e000604b32a"
 ```
 
 #### Obtener lanzamientos paginados con filtro
 ```bash
-curl -X GET "https://fwit88xlf0.execute-api.us-east-1.amazonaws.com/api/launches/paginated?status=success&page=0&size=10"
+curl -X GET "https://lbs33m5sf6.execute-api.us-east-1.amazonaws.com/prod/api/launches/paginated?status=success&page=0&size=10"
 ```
 
 #### Obtener estadísticas
 ```bash
-curl -X GET "https://fwit88xlf0.execute-api.us-east-1.amazonaws.com/api/launches/stats"
+curl -X GET "https://lbs33m5sf6.execute-api.us-east-1.amazonaws.com/prod/api/launches/stats"
 ```
 
 ## 📊 Modelos de Datos
@@ -183,7 +183,7 @@ springdoc:
     path: /docs
   swagger-ui:
     enabled: true
-    path: /swagger
+    path: /swagger-ui
 ```
 
 ## 🏗️ Arquitectura

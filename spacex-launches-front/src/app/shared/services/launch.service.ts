@@ -3,12 +3,13 @@ import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
 import { Observable, throwError, forkJoin } from 'rxjs';
 import { catchError, map, switchMap, retry } from 'rxjs/operators';
 import { LaunchSummaryResponse, LaunchResponse, StatsDataResponse, LaunchPageResponse } from '../models/launch.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LaunchService {
-  private readonly baseUrl = 'https://fwit88xlf0.execute-api.us-east-1.amazonaws.com/api';
+  private readonly baseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 

@@ -1,0 +1,26 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  config:
+    activate:
+      on-profile: local
+
+springdoc:
+  swagger-ui:
+    config-url: /api/v3/api-docs/swagger-config
+    url: /api/v3/api-docs
+
+
+aws:
+  access : ${AWS_ACCESS_KEY_ID}
+  secret : ${AWS_SECRET_ACCESS_KEY}
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.data.jpa: DEBUG
+    io.github.cristhianm30.spacex-launches-back: DEBUG

@@ -1,0 +1,81 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches: ["develop"]
+    paths:
+      - "spacex-launches-back/**"
+      - ".github/workflows/backend.yml"
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v4
+
+      - name: Make gradlew executable
+        run: chmod +x spacex-launches-back/gradlew
+
+      - name: Build Spring Boot app
+        run: |
+            cd spacex-launches-back
+            ./gradlew clean build -x test --no-daemon
+
+
+      - name: Run unit tests (JaCoCo)
+        run: |
+          cd spacex-launches-back
+          ./gradlew clean test jacocoTestReport --no-daemon
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-reports
+          path: spacex-launches-back/build/reports/tests/test
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage-report
+          path: spacex-launches-back/build/reports/jacoco/test/html
+
+      - name: Build Docker image
+        run: |
+          IMAGE=${{ secrets.ECR_REGISTRY }}/spacex-launches-back:latest
+          docker build -t $IMAGE spacex-launches-back
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Push Docker image
+        run: docker push $IMAGE
+
+      - name: Update ECS Service
+        run: |
+          aws ecs update-service \
+            --cluster ${{ secrets.ECS_CLUSTER }} \
+            --service ${{ secrets.ECS_SERVICE_BACK }} \
+            --force-new-deployment \
+            --region ${{ secrets.AWS_REGION }}

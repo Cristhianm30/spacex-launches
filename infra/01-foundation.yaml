@@ -1,0 +1,296 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Foundation infrastructure for SpaceX Launches - IAM, ECR, Security Groups
+
+Parameters:
+  VpcId:
+    Type: String
+    Description: VPC ID where resources will be created
+  ProjectName:
+    Type: String
+    Default: spacex-launches
+    Description: Project name for resource naming and tagging
+
+Resources:
+  # --- IAM Roles ---
+  EcsTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-ecsTaskRole"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${ProjectName}"
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Owner
+          Value: Cristhian Moreno
+        - Key: Environment
+          Value: prod
+
+  EcsTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-ecsTaskExecutionRole"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Owner
+          Value: Cristhian Moreno
+        - Key: Environment
+          Value: prod
+
+  # --- ECR Repositories ---
+  BackendEcrRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Sub "${ProjectName}-back"
+      ImageScanningConfiguration: 
+        ScanOnPush: true
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Keep last 10 images",
+                "selection": {
+                  "tagStatus": "any",
+                  "countType": "imageCountMoreThan",
+                  "countNumber": 10
+                },
+                "action": {
+                  "type": "expire"
+                }
+              }
+            ]
+          }
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Owner
+          Value: Cristhian Moreno
+        - Key: Environment
+          Value: prod
+
+  # --- IAM User for GitHub Actions ---
+  GitHubActionsUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: !Sub "${ProjectName}-github-actions-user"
+      Policies:
+        - PolicyName: ComprehensiveDeploymentPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              # ECR permissions for backend
+              - Effect: Allow
+                Action:
+                  - ecr:GetAuthorizationToken
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchGetImage
+                  - ecr:PutImage
+                  - ecr:InitiateLayerUpload
+                  - ecr:UploadLayerPart
+                  - ecr:CompleteLayerUpload
+                Resource: 
+                  - !Sub "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${ProjectName}-back"
+              - Effect: Allow
+                Action:
+                  - ecr:GetAuthorizationToken
+                Resource: "*"
+              # ECS permissions for backend deployment
+              - Effect: Allow
+                Action:
+                  - ecs:UpdateService
+                  - ecs:DescribeServices
+                  - ecs:DescribeClusters
+                  - ecs:DescribeTaskDefinition
+                  - ecs:RegisterTaskDefinition
+                Resource: 
+                  - !Sub "arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:cluster/${ProjectName}-cluster"
+                  - !Sub "arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:service/${ProjectName}-cluster/${ProjectName}-backend-service"
+                  - !Sub "arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ProjectName}-backend-task:*"
+              # S3 permissions for frontend
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:PutObjectAcl
+                  - s3:GetObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub "arn:aws:s3:::${ProjectName}-frontend-${AWS::AccountId}"
+                  - !Sub "arn:aws:s3:::${ProjectName}-frontend-${AWS::AccountId}/*"
+              # CloudFront permissions for frontend
+              - Effect: Allow
+                Action:
+                  - cloudfront:CreateInvalidation
+                  - cloudfront:GetInvalidation
+                  - cloudfront:ListInvalidations
+                Resource: "*"
+              # Lambda permissions
+              - Effect: Allow
+                Action:
+                  - lambda:UpdateFunctionCode
+                  - lambda:UpdateFunctionConfiguration
+                  - lambda:GetFunction
+                  - lambda:PublishVersion
+                  - lambda:CreateAlias
+                  - lambda:UpdateAlias
+                  - lambda:GetAlias
+                Resource: 
+                  - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${ProjectName}-*"
+              # IAM permissions for role passing
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource:
+                  - !GetAtt EcsTaskRole.Arn
+                  - !GetAtt EcsTaskExecutionRole.Arn
+              # CloudFormation permissions for stack outputs
+              - Effect: Allow
+                Action:
+                  - cloudformation:DescribeStacks
+                Resource: 
+                  - !Sub "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${ProjectName}-*"
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Owner
+          Value: Cristhian Moreno
+        - Key: Environment
+          Value: prod
+
+  # --- Security Groups ---
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub "${ProjectName}-alb-sg"
+      GroupDescription: Security Group for Application Load Balancer
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+          Description: HTTP access from internet
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+          Description: HTTPS access from internet
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 172.31.0.0/16
+          Description: HTTP access from VPC Link (API Gateway)
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+          Description: All outbound traffic
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectName}-alb-sg"
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Owner
+          Value: Cristhian Moreno
+        - Key: Environment
+          Value: prod
+
+  ECSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub "${ProjectName}-ecs-sg"
+      GroupDescription: Security Group for ECS tasks
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+          Description: Backend access from ALB
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+          Description: Frontend access from ALB
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+          Description: All outbound traffic
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectName}-ecs-sg"
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Owner
+          Value: Cristhian Moreno
+        - Key: Environment
+          Value: prod
+
+Outputs:
+  EcsTaskRoleArn:
+    Description: ARN of the ECS Task Role
+    Value: !GetAtt EcsTaskRole.Arn
+    Export:
+      Name: !Sub "${ProjectName}-EcsTaskRoleArn"
+
+  EcsTaskExecutionRoleArn:
+    Description: ARN of the ECS Task Execution Role
+    Value: !GetAtt EcsTaskExecutionRole.Arn
+    Export:
+      Name: !Sub "${ProjectName}-EcsTaskExecutionRoleArn"
+
+  BackendEcrRepoUri:
+    Description: URI of the Backend ECR Repository
+    Value: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${BackendEcrRepository}"
+    Export:
+      Name: !Sub "${ProjectName}-BackendEcrRepoUri"
+
+  ALBSecurityGroupId:
+    Description: ID of the ALB Security Group
+    Value: !Ref ALBSecurityGroup
+    Export:
+      Name: !Sub "${ProjectName}-ALBSecurityGroupId"
+
+  ECSSecurityGroupId:
+    Description: ID of the ECS Security Group
+    Value: !Ref ECSSecurityGroup
+    Export:
+      Name: !Sub "${ProjectName}-ECSSecurityGroupId"
+
+  GitHubActionsUserArn:
+    Description: ARN of the GitHub Actions IAM User
+    Value: !GetAtt GitHubActionsUser.Arn
+    Export:
+      Name: !Sub "${ProjectName}-GitHubActionsUserArn"
+

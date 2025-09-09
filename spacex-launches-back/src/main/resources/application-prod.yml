@@ -10,9 +10,9 @@ spring:
 
 springdoc:
   api-docs:
-    path: /docs
+    path: /prod/api/docs
   swagger-ui:
     enabled: true
-    path: /swagger-ui
-    config-url: /docs/swagger-config
-    url: /docs
+    path: /prod/api/swagger-ui
+    config-url: /prod/api/docs/swagger-config
+    url: /prod/api/docs

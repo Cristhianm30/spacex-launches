@@ -7,12 +7,3 @@ spring:
   config:
     activate:
       on-profile: prod
-
-springdoc:
-  api-docs:
-    path: /prod/api/docs
-  swagger-ui:
-    enabled: true
-    path: /prod/api/swagger-ui
-    config-url: /prod/api/docs/swagger-config
-    url: /prod/api/docs

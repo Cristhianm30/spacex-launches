@@ -3,7 +3,7 @@ name: Frontend CI/CD
 # Se ejecuta cuando haces push a la rama develop
 on:
   push:
-    branches: ["develop"]
+    branches: ["main"]
     paths:
       - "spacex-launches-front/**"
       - ".github/workflows/frontend.yml"

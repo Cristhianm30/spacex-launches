@@ -2,7 +2,7 @@ name: Lambda CI/CD
 
 on:
   push:
-    branches: ["develop" ]
+    branches: ["main"]
     paths:
       - "spacex-launches-lambda/**"
       - ".github/workflows/lambda.yml"

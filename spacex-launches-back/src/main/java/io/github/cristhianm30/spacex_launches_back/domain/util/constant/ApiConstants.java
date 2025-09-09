@@ -14,8 +14,8 @@ public final class ApiConstants {
     
     public static final String LICENSE_NAME = "MIT";
     
-    public static final String BASE_SERVER_URL = "/api";
-    public static final String BASE_SERVER_DESCRIPTION = "Base path detrás de API Gateway o reverse proxy";
+    public static final String BASE_SERVER_URL = "http://localhost:8080/api";
+    public static final String BASE_SERVER_DESCRIPTION = "Local development server";
     public static final String PRODUCTION_SERVER_URL = "https://lbs33m5sf6.execute-api.us-east-1.amazonaws.com/prod/api";
-    public static final String PRODUCTION_SERVER_DESCRIPTION = "Production";
+    public static final String PRODUCTION_SERVER_DESCRIPTION = "Production server";
 }

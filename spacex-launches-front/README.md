@@ -17,7 +17,7 @@ Frontend moderno y responsive que consume la API de SpaceX Launches para mostrar
 
 ## 📱 URLs
 
-- **Producción**: https://d3j8k2l9m4n5o6.cloudfront.net
+- **Producción**: https://d3eq0c7gc5qw7o.cloudfront.net/
 - **API Backend**: https://lbs33m5sf6.execute-api.us-east-1.amazonaws.com/prod/api
 - **Local**: http://localhost:4200
 

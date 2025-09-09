@@ -1,0 +1,74 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  spacex-launches-sync
+
+  Sample SAM Template for spacex-launches-sync
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 128
+
+    LoggingConfig:
+      LogFormat: JSON
+    Tags:                
+      Project: spacex-launches
+      Owner: Cristhian Moreno
+      Environment: prod
+      ManagedBy: SAM
+
+Resources:
+  LaunchesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: spacex-launches
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: launch_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: launch_id
+          KeyType: HASH
+      Tags:              
+        - Key: Project
+          Value: spacex-launches
+        - Key: Owner
+          Value: Cristhian Moreno
+        - Key: Environment
+          Value: prod
+
+  SpaceXFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: spacex-launches-sync
+      CodeUri: src/
+      Handler: app.lambda_handler
+      Runtime: python3.13
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          SPACEX_TABLE_NAME: !Ref LaunchesTable
+          SPACEX_AWS_REGION: !Ref AWS::Region
+          SPACEX_API_URL: "https://api.spacexdata.com/v4/launches"
+          SPACEX_REQUEST_TIMEOUT: 30
+          LOG_LEVEL: "INFO"
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref LaunchesTable
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /sync
+            Method: get
+        ScheduleRule:
+          Type: Schedule
+          Properties:
+            Schedule: rate(6 hours)
+
+Outputs:
+  ApiUrl:
+    Description: "Endpoint de API Gateway para invocar Lambda manualmente"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/sync"

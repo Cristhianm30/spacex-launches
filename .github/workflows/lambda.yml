@@ -1,0 +1,65 @@
+name: Lambda CI/CD
+
+on:
+  push:
+    branches: ["develop" ]
+    paths:
+      - "spacex-launches-lambda/**"
+      - ".github/workflows/lambda.yml"
+
+jobs:
+  deploy-lambda:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Descargar código
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Configurar Python
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # 3. Instalar dependencias
+      - name: Install dependencies
+        run: |
+          cd spacex-launches-lambda
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+
+      # 4. Ejecutar pruebas
+      - name: Run unit tests
+        run: |
+          cd spacex-launches-lambda
+          pytest -q --disable-warnings --maxfail=1
+
+      # 5. Empaquetar Lambda en ZIP
+      - name: Package Lambda
+        run: |
+            cd spacex-launches-lambda
+            mkdir -p package
+            # instalar dependencias en la carpeta package
+            pip install -r requirements.txt -t package
+            # copiar el código fuente (incluyendo app.py) dentro de package
+            cp -r src/* package/
+            cd package
+            zip -r ../function.zip .
+
+      # 6. Configurar credenciales AWS
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # 7. Actualizar Lambda en AWS
+      - name: Deploy Lambda
+        run: |
+          aws lambda update-function-code \
+            --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
+            --zip-file fileb://spacex-launches-lambda/function.zip \
+            --region ${{ secrets.AWS_REGION }}

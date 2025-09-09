@@ -1,0 +1,42 @@
+/* Breadcrumb Component Styles */
+.breadcrumb-nav {
+  background-color: white;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0.75rem 1rem;
+  display: block;
+}
+
+/* Dark mode styles */
+:host-context(.dark) .breadcrumb-nav {
+  background-color: #262626;
+  border-bottom-color: #404040;
+}
+
+/* Hide on desktop by default, show only on mobile */
+@media (min-width: 768px) {
+  .breadcrumb-nav {
+    display: none;
+  }
+}
+
+.breadcrumb-nav.desktop-visible {
+  /* Show on all screen sizes when explicitly enabled */
+  display: block;
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 768px) {
+  .breadcrumb-nav {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+  }
+  
+  .breadcrumb-nav ol {
+    gap: 0.25rem;
+  }
+  
+  .breadcrumb-nav svg {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+}

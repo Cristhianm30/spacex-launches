@@ -1,0 +1,15 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+springdoc:
+  swagger-ui:
+    config-url: /prod/api/v3/api-docs/swagger-config
+    url: /prod/api/v3/api-docs
+

@@ -1,0 +1,83 @@
+name: Frontend CI/CD
+
+# Se ejecuta cuando haces push a la rama develop
+on:
+  push:
+    branches: ["develop"]
+    paths:
+      - "spacex-launches-front/**"
+      - ".github/workflows/frontend.yml"
+
+jobs:
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    
+
+    steps:
+      # 1. Descargar código
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Instalar Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: spacex-launches-front/package-lock.json
+
+      # 3. Instalar dependencias
+      - name: Install dependencies
+        run: |
+          cd spacex-launches-front
+          npm ci
+
+      # 4. Ejecutar pruebas
+      - name: Run tests
+        run: |
+          cd spacex-launches-front
+          npm test -- --watchAll=false --browsers=ChromeHeadless
+
+      # 5. Build Angular app para producción
+      - name: Build Angular app
+        run: |
+          cd spacex-launches-front
+          npm run build -- --configuration production
+
+      # 6. Configurar credenciales AWS
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # 7. Sincronizar archivos con S3
+      - name: Deploy to S3
+        run: |
+          aws s3 sync spacex-launches-front/dist/spacex-launches-front/browser/ s3://spacex-launches-frontend-${{ secrets.AWS_ACCOUNT_ID }}/ \
+            --delete
+
+      # 8. Invalidar cache de CloudFront
+      - name: Invalidate CloudFront
+        run: |
+          DISTRIBUTION_ID=$(aws cloudformation describe-stacks \
+            --stack-name spacex-launches-frontend \
+            --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionId'].OutputValue" \
+            --output text)
+          
+          aws cloudfront create-invalidation \
+            --distribution-id $DISTRIBUTION_ID \
+            --paths "/*"
+
+      # 9. Mostrar URL del frontend
+      - name: Display Frontend URL
+        run: |
+          FRONTEND_URL=$(aws cloudformation describe-stacks \
+            --stack-name spacex-launches-frontend \
+            --query "Stacks[0].Outputs[?OutputKey=='FrontendURL'].OutputValue" \
+            --output text)
+          
+          echo "🚀 Frontend deployed successfully!"
+          echo "📱 Frontend URL: $FRONTEND_URL"
+          echo "⏰ Deployment completed at: $(date)"

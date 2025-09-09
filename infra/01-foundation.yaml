@@ -99,30 +99,88 @@ Resources:
         - Key: Environment
           Value: prod
 
-  FrontendEcrRepository:
-    Type: AWS::ECR::Repository
+  # --- IAM User for GitHub Actions ---
+  GitHubActionsUser:
+    Type: AWS::IAM::User
     Properties:
-      RepositoryName: !Sub "${ProjectName}-front"
-      ImageScanningConfiguration: 
-        ScanOnPush: true
-      LifecyclePolicy:
-        LifecyclePolicyText: |
-          {
-            "rules": [
-              {
-                "rulePriority": 1,
-                "description": "Keep last 10 images",
-                "selection": {
-                  "tagStatus": "any",
-                  "countType": "imageCountMoreThan",
-                  "countNumber": 10
-                },
-                "action": {
-                  "type": "expire"
-                }
-              }
-            ]
-          }
+      UserName: !Sub "${ProjectName}-github-actions-user"
+      Policies:
+        - PolicyName: ComprehensiveDeploymentPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              # ECR permissions for backend
+              - Effect: Allow
+                Action:
+                  - ecr:GetAuthorizationToken
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchGetImage
+                  - ecr:PutImage
+                  - ecr:InitiateLayerUpload
+                  - ecr:UploadLayerPart
+                  - ecr:CompleteLayerUpload
+                Resource: 
+                  - !Sub "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${ProjectName}-back"
+              - Effect: Allow
+                Action:
+                  - ecr:GetAuthorizationToken
+                Resource: "*"
+              # ECS permissions for backend deployment
+              - Effect: Allow
+                Action:
+                  - ecs:UpdateService
+                  - ecs:DescribeServices
+                  - ecs:DescribeClusters
+                  - ecs:DescribeTaskDefinition
+                  - ecs:RegisterTaskDefinition
+                Resource: 
+                  - !Sub "arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:cluster/${ProjectName}-cluster"
+                  - !Sub "arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:service/${ProjectName}-cluster/${ProjectName}-backend-service"
+                  - !Sub "arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${ProjectName}-backend-task:*"
+              # S3 permissions for frontend
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:PutObjectAcl
+                  - s3:GetObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub "arn:aws:s3:::${ProjectName}-frontend-${AWS::AccountId}"
+                  - !Sub "arn:aws:s3:::${ProjectName}-frontend-${AWS::AccountId}/*"
+              # CloudFront permissions for frontend
+              - Effect: Allow
+                Action:
+                  - cloudfront:CreateInvalidation
+                  - cloudfront:GetInvalidation
+                  - cloudfront:ListInvalidations
+                Resource: "*"
+              # Lambda permissions
+              - Effect: Allow
+                Action:
+                  - lambda:UpdateFunctionCode
+                  - lambda:UpdateFunctionConfiguration
+                  - lambda:GetFunction
+                  - lambda:PublishVersion
+                  - lambda:CreateAlias
+                  - lambda:UpdateAlias
+                  - lambda:GetAlias
+                Resource: 
+                  - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${ProjectName}-*"
+              # IAM permissions for role passing
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource:
+                  - !GetAtt EcsTaskRole.Arn
+                  - !GetAtt EcsTaskExecutionRole.Arn
+              # CloudFormation permissions for stack outputs
+              - Effect: Allow
+                Action:
+                  - cloudformation:DescribeStacks
+                Resource: 
+                  - !Sub "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${ProjectName}-*"
       Tags:
         - Key: Project
           Value: !Ref ProjectName
@@ -218,12 +276,6 @@ Outputs:
     Export:
       Name: !Sub "${ProjectName}-BackendEcrRepoUri"
 
-  FrontendEcrRepoUri:
-    Description: URI of the Frontend ECR Repository
-    Value: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${FrontendEcrRepository}"
-    Export:
-      Name: !Sub "${ProjectName}-FrontendEcrRepoUri"
-
   ALBSecurityGroupId:
     Description: ID of the ALB Security Group
     Value: !Ref ALBSecurityGroup
@@ -235,3 +287,10 @@ Outputs:
     Value: !Ref ECSSecurityGroup
     Export:
       Name: !Sub "${ProjectName}-ECSSecurityGroupId"
+
+  GitHubActionsUserArn:
+    Description: ARN of the GitHub Actions IAM User
+    Value: !GetAtt GitHubActionsUser.Arn
+    Export:
+      Name: !Sub "${ProjectName}-GitHubActionsUserArn"
+

@@ -14,9 +14,5 @@
   {
     "ParameterKey": "BackendImageTag",
     "ParameterValue": "latest"
-  },
-  {
-    "ParameterKey": "FrontendImageTag",
-    "ParameterValue": "latest"
   }
 ]

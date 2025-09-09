@@ -69,38 +69,6 @@ Resources:
         - Key: Environment
           Value: prod
 
-  FrontendTargetGroup:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    Properties:
-      Name: !Sub "${ProjectName}-frontend-tg"
-      VpcId: !Ref VpcId
-      Protocol: HTTP
-      Port: 80
-      TargetType: ip
-      HealthCheckEnabled: true
-      HealthCheckPath: /health
-      HealthCheckProtocol: HTTP
-      HealthCheckPort: traffic-port
-      HealthCheckIntervalSeconds: 30
-      HealthCheckTimeoutSeconds: 5
-      HealthyThresholdCount: 2
-      UnhealthyThresholdCount: 3
-      Matcher:
-        HttpCode: 200
-      TargetGroupAttributes:
-        - Key: deregistration_delay.timeout_seconds
-          Value: 30
-        - Key: stickiness.enabled
-          Value: false
-      Tags:
-        - Key: Name
-          Value: !Sub "${ProjectName}-frontend-tg"
-        - Key: Project
-          Value: !Ref ProjectName
-        - Key: Owner
-          Value: Cristhian Moreno
-        - Key: Environment
-          Value: prod
 
   # --- ALB Listeners ---
   ALBListener:
@@ -110,8 +78,11 @@ Resources:
       Port: 80
       Protocol: HTTP
       DefaultActions:
-        - Type: forward
-          TargetGroupArn: !Ref FrontendTargetGroup
+        - Type: fixed-response
+          FixedResponseConfig:
+            StatusCode: 404
+            ContentType: text/plain
+            MessageBody: "Not Found - API endpoints available at /api/*"
 
   # --- Listener Rules ---
   BackendListenerRule:
@@ -128,19 +99,6 @@ Resources:
         - Type: forward
           TargetGroupArn: !Ref BackendTargetGroup
 
-  HealthCheckListenerRule:
-    Type: AWS::ElasticLoadBalancingV2::ListenerRule
-    Properties:
-      ListenerArn: !Ref ALBListener
-      Priority: 200
-      Conditions:
-        - Field: path-pattern
-          PathPatternConfig:
-            Values:
-              - "/health"
-      Actions:
-        - Type: forward
-          TargetGroupArn: !Ref FrontendTargetGroup
 
   # --- API Gateway (REST API v1) ---
   ApiGatewayRest:
@@ -185,40 +143,6 @@ Resources:
           integration.request.path.proxy: "method.request.path.proxy"
 
   # Root proxy (para frontend)
-  ApiGatewayResourceRootProxy:
-    Type: AWS::ApiGateway::Resource
-    Properties:
-      ParentId: !GetAtt ApiGatewayRest.RootResourceId
-      PathPart: "{proxy+}"
-      RestApiId: !Ref ApiGatewayRest
-
-  ApiGatewayMethodRootProxy:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      RestApiId: !Ref ApiGatewayRest
-      ResourceId: !Ref ApiGatewayResourceRootProxy
-      HttpMethod: ANY
-      AuthorizationType: NONE
-      RequestParameters:
-        method.request.path.proxy: true
-      Integration:
-        Type: HTTP_PROXY
-        IntegrationHttpMethod: ANY
-        Uri: !Sub "http://${ApplicationLoadBalancer.DNSName}/{proxy}"
-        RequestParameters:
-          integration.request.path.proxy: "method.request.path.proxy"
-
-  ApiGatewayMethodRoot:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      RestApiId: !Ref ApiGatewayRest
-      ResourceId: !GetAtt ApiGatewayRest.RootResourceId
-      HttpMethod: ANY
-      AuthorizationType: NONE
-      Integration:
-        Type: HTTP_PROXY
-        IntegrationHttpMethod: ANY
-        Uri: !Sub "http://${ApplicationLoadBalancer.DNSName}"
 
   ApiGatewayDeployment:
     Type: AWS::ApiGateway::Deployment
@@ -227,8 +151,6 @@ Resources:
       StageName: prod
       Description: Production stage
     DependsOn:
-      - ApiGatewayMethodRoot
-      - ApiGatewayMethodRootProxy
       - ApiGatewayMethodApiProxy
 
   # --- CloudWatch Log Group for API Gateway ---
@@ -264,8 +186,15 @@ Outputs:
     Export:
       Name: !Sub "${ProjectName}-BackendTargetGroupArn"
 
-  FrontendTargetGroupArn:
-    Description: ARN of the Frontend Target Group
-    Value: !Ref FrontendTargetGroup
+
+  ApiGatewayId:
+    Description: ID of the API Gateway REST API
+    Value: !Ref ApiGatewayRest
     Export:
-      Name: !Sub "${ProjectName}-FrontendTargetGroupArn"
+      Name: !Sub "${ProjectName}-ApiGatewayId"
+
+  ApiGatewayUrl:
+    Description: URL of the API Gateway
+    Value: !Sub "https://${ApiGatewayRest}.execute-api.${AWS::Region}.amazonaws.com/prod"
+    Export:
+      Name: !Sub "${ProjectName}-ApiGatewayUrl"

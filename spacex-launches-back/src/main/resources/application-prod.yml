@@ -9,5 +9,8 @@ spring:
       on-profile: prod
 
 springdoc:
+  api-docs:
+    path: /docs
   swagger-ui:
     enabled: true
+    path: /swagger

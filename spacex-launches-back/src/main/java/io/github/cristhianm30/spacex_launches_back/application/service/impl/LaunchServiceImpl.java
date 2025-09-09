@@ -3,6 +3,7 @@ package io.github.cristhianm30.spacex_launches_back.application.service.impl;
 import io.github.cristhianm30.spacex_launches_back.application.dto.response.LaunchResponse;
 import io.github.cristhianm30.spacex_launches_back.application.dto.response.LaunchSummaryResponse;
 import io.github.cristhianm30.spacex_launches_back.application.dto.response.StatsDataResponse;
+import io.github.cristhianm30.spacex_launches_back.domain.util.constant.LaunchStatusConstants;
 import io.github.cristhianm30.spacex_launches_back.application.mapper.LaunchMapperDto;
 import io.github.cristhianm30.spacex_launches_back.application.service.api.LaunchService;
 import io.github.cristhianm30.spacex_launches_back.domain.model.LaunchModel;
@@ -64,13 +65,13 @@ public class LaunchServiceImpl implements LaunchService {
 
         for (LaunchSummaryResponse launch : all) {
             switch (launch.getStatus()) {
-                case "success":
+                case LaunchStatusConstants.SUCCESS:
                     successful++;
                     break;
-                case "failed":
+                case LaunchStatusConstants.FAILED:
                     failed++;
                     break;
-                case "upcoming":
+                case LaunchStatusConstants.UPCOMING:
                     upcoming++;
                     break;
             }
@@ -87,5 +88,3 @@ public class LaunchServiceImpl implements LaunchService {
                 .build();
     }
 }
-
-

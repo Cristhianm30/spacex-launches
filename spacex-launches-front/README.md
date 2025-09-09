@@ -1,6 +1,36 @@
-# SpacexLaunchesFront
+# SpaceX Launches Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.2.1.
+Aplicación Angular para visualizar información de lanzamientos de SpaceX. Construida con Angular 20.2.1, TailwindCSS y Preline UI.
+
+## 🚀 Descripción
+
+Frontend moderno y responsive que consume la API de SpaceX Launches para mostrar información detallada de lanzamientos históricos y futuros.
+
+## 🛠️ Tecnologías
+
+- **Angular 20.2.1** - Framework principal
+- **TypeScript** - Lenguaje de programación
+- **TailwindCSS** - Framework de estilos utility-first
+- **Preline UI** - Componentes y elementos de interfaz
+- **Jest** - Framework de testing
+- **S3 + CloudFront** - Hosting y CDN
+
+## 📱 URLs
+
+- **Producción**: https://d3j8k2l9m4n5o6.cloudfront.net
+- **API Backend**: https://lbs33m5sf6.execute-api.us-east-1.amazonaws.com/prod/api
+- **Local**: http://localhost:4200
+
+## 📋 Características
+
+- ✅ Listado paginado de lanzamientos
+- ✅ Filtros por estado (exitoso/fallido/próximo)
+- ✅ Búsqueda por misión y cohete
+- ✅ Vista detallada de cada lanzamiento
+- ✅ Responsive design con TailwindCSS
+- ✅ Componentes UI modernos con Preline
+- ✅ Testing con Jest
+- ✅ PWA ready
 
 ## Development server
 
@@ -38,10 +68,10 @@ This will compile your project and store the build artifacts in the `dist/` dire
 
 ## Running unit tests
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+To execute unit tests with Jest, use the following command:
 
 ```bash
-ng test
+npm test
 ```
 
 ## Running end-to-end tests

@@ -6,6 +6,8 @@ import io.github.cristhianm30.spacex_launches_back.application.dto.response.Stat
 import io.github.cristhianm30.spacex_launches_back.application.service.api.LaunchService;
 import io.github.cristhianm30.spacex_launches_back.domain.model.Page;
 import io.github.cristhianm30.spacex_launches_back.domain.model.Pageable;
+import io.github.cristhianm30.spacex_launches_back.domain.util.constant.EndpointConstants;
+import io.github.cristhianm30.spacex_launches_back.domain.util.constant.LaunchStatusConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -20,15 +22,15 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/launches")
-@CrossOrigin(origins = "*")
+@RequestMapping(EndpointConstants.LAUNCHES_BASE)
+@CrossOrigin(origins = EndpointConstants.CORS_ORIGINS)
 @RequiredArgsConstructor
 @Tag(name = "Launches", description = "Operaciones de consulta de lanzamientos SpaceX")
 public class LaunchController {
 
     private final LaunchService service;
 
-    @GetMapping("/{id}")
+    @GetMapping(EndpointConstants.ID_PATH)
     @Operation(summary = "Obtener detalle por ID", description = "Devuelve el detalle de un lanzamiento.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lanzamiento encontrado",
@@ -53,7 +55,7 @@ public class LaunchController {
         return ResponseEntity.ok(service.getAllLaunches());
     }
 
-    @GetMapping("/paginated")
+    @GetMapping(EndpointConstants.PAGINATED)
     @Operation(summary = "Obtener lanzamientos paginados", description = "Devuelve una lista paginada de lanzamientos con filtro opcional por estado.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista paginada obtenida exitosamente",
@@ -68,7 +70,7 @@ public class LaunchController {
         return ResponseEntity.ok(service.getLaunches(status, pageable));
     }
 
-    @GetMapping("/status/{status}")
+    @GetMapping(EndpointConstants.STATUS_PATH)
     @Operation(summary = "Obtener lanzamientos por estado", description = "Devuelve todos los lanzamientos que coinciden con el estado especificado.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista de lanzamientos por estado obtenida exitosamente",
@@ -81,7 +83,7 @@ public class LaunchController {
         return ResponseEntity.ok(service.getLaunchesByStatus(status));
     }
 
-    @GetMapping("/rocket/{rocketId}")
+    @GetMapping(EndpointConstants.ROCKET_PATH)
     @Operation(summary = "Obtener lanzamientos por cohete", description = "Devuelve todos los lanzamientos realizados por un cohete específico.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista de lanzamientos por cohete obtenida exitosamente",
@@ -94,7 +96,7 @@ public class LaunchController {
         return ResponseEntity.ok(service.getLaunchesByRocket(rocketId));
     }
 
-    @GetMapping("/successful")
+    @GetMapping(EndpointConstants.SUCCESSFUL)
     @Operation(summary = "Obtener lanzamientos exitosos", description = "Devuelve todos los lanzamientos que fueron exitosos.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista de lanzamientos exitosos obtenida exitosamente",
@@ -102,10 +104,10 @@ public class LaunchController {
             )
     })
     public ResponseEntity<List<LaunchSummaryResponse>> getSuccessfulLaunches() {
-        return ResponseEntity.ok(service.getLaunchesByStatus("success"));
+        return ResponseEntity.ok(service.getLaunchesByStatus(LaunchStatusConstants.SUCCESS));
     }
 
-    @GetMapping("/failed")
+    @GetMapping(EndpointConstants.FAILED)
     @Operation(summary = "Obtener lanzamientos fallidos", description = "Devuelve todos los lanzamientos que fallaron.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista de lanzamientos fallidos obtenida exitosamente",
@@ -113,10 +115,10 @@ public class LaunchController {
             )
     })
     public ResponseEntity<List<LaunchSummaryResponse>> getFailedLaunches() {
-        return ResponseEntity.ok(service.getLaunchesByStatus("failed"));
+        return ResponseEntity.ok(service.getLaunchesByStatus(LaunchStatusConstants.FAILED));
     }
 
-    @GetMapping("/stats")
+    @GetMapping(EndpointConstants.STATS)
     @Operation(summary = "Obtener estadísticas de lanzamientos", description = "Devuelve estadísticas generales sobre todos los lanzamientos.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Estadísticas obtenidas exitosamente",

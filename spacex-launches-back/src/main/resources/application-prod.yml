@@ -13,6 +13,6 @@ springdoc:
     path: /docs
   swagger-ui:
     enabled: true
-    path: /swagger
+    path: /swagger-ui
     config-url: /docs/swagger-config
     url: /docs

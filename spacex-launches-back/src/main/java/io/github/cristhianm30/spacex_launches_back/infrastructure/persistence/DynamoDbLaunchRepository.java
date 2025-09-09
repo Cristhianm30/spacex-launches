@@ -1,5 +1,8 @@
 package io.github.cristhianm30.spacex_launches_back.infrastructure.persistence;
 
+import io.github.cristhianm30.spacex_launches_back.domain.exception.DatabaseOperationException;
+import io.github.cristhianm30.spacex_launches_back.domain.exception.InvalidParameterException;
+import io.github.cristhianm30.spacex_launches_back.domain.util.constant.DatabaseConstants;
 import io.github.cristhianm30.spacex_launches_back.domain.model.LaunchModel;
 import io.github.cristhianm30.spacex_launches_back.domain.model.Page;
 import io.github.cristhianm30.spacex_launches_back.domain.model.Pageable;
@@ -25,55 +28,101 @@ public class DynamoDbLaunchRepository implements LaunchRepositoryPort {
 
     public DynamoDbLaunchRepository(DynamoDbEnhancedClient enhancedClient,
                                     LaunchEntityMapper mapper) {
-        this.table = enhancedClient.table("spacex-launches", TableSchema.fromBean(LaunchEntity.class));
+        this.table = enhancedClient.table(DatabaseConstants.SPACEX_LAUNCHES_TABLE, TableSchema.fromBean(LaunchEntity.class));
         this.mapper = mapper;
     }
 
     @Override
     public Optional<LaunchModel> findById(String id) {
-        Key key = Key.builder().partitionValue(id).build();
-        LaunchEntity entity = table.getItem(key);
-        return Optional.ofNullable(entity).map(mapper::toDomain);
+        if (id == null || id.trim().isEmpty()) {
+            throw new InvalidParameterException(DatabaseConstants.LAUNCH_ID_NULL_OR_EMPTY);
+        }
+        
+        try {
+            Key key = Key.builder().partitionValue(id).build();
+            LaunchEntity entity = table.getItem(key);
+            return Optional.ofNullable(entity).map(mapper::toDomain);
+        } catch (Exception e) {
+            throw new DatabaseOperationException(DatabaseConstants.ERROR_RETRIEVING_LAUNCH_BY_ID + id, e);
+        }
     }
 
     @Override
     public List<LaunchModel> findAll() {
-        return table.scan(ScanEnhancedRequest.builder().build())
-                .items()
-                .stream()
-                .map(mapper::toDomain)
-                .toList();
+        try {
+            return table.scan(ScanEnhancedRequest.builder().build())
+                    .items()
+                    .stream()
+                    .map(mapper::toDomain)
+                    .toList();
+        } catch (Exception e) {
+            throw new DatabaseOperationException(DatabaseConstants.ERROR_RETRIEVING_ALL_LAUNCHES, e);
+        }
     }
 
     @Override
     public Page<LaunchModel> findAll(String status, Pageable pageable) {
-        List<LaunchModel> launches = findAll();
-
-        if (status != null && !status.isEmpty()) {
-            launches = launches.stream()
-                    .filter(launch -> status.equals(launch.getStatus()))
-                    .collect(Collectors.toList());
+        if (pageable == null) {
+            throw new InvalidParameterException(DatabaseConstants.PAGEABLE_NULL);
         }
+        
+        if (pageable.getPageNumber() < 0 || pageable.getPageSize() <= 0) {
+            throw new InvalidParameterException(DatabaseConstants.INVALID_PAGINATION_PARAMS);
+        }
+        
+        try {
+            List<LaunchModel> launches = findAll();
 
-        int start = pageable.getPageNumber() * pageable.getPageSize();
-        int end = Math.min((start + pageable.getPageSize()), launches.size());
+            if (status != null && !status.isEmpty()) {
+                launches = launches.stream()
+                        .filter(launch -> status.equals(launch.getStatus()))
+                        .collect(Collectors.toList());
+            }
 
-        return new Page<>(launches.subList(start, end), pageable.getPageNumber(), pageable.getPageSize(), launches.size());
+            int start = pageable.getPageNumber() * pageable.getPageSize();
+            int end = Math.min((start + pageable.getPageSize()), launches.size());
+
+            return new Page<>(launches.subList(start, end), pageable.getPageNumber(), pageable.getPageSize(), launches.size());
+        } catch (DatabaseOperationException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new DatabaseOperationException(DatabaseConstants.ERROR_RETRIEVING_PAGINATED_LAUNCHES, e);
+        }
     }
 
     @Override
     public List<LaunchModel> findByStatus(String status) {
-        return findAll()
-                .stream()
-                .filter(launch -> status.equals(launch.getStatus()))
-                .toList();
+        if (status == null || status.trim().isEmpty()) {
+            throw new InvalidParameterException(DatabaseConstants.STATUS_NULL_OR_EMPTY);
+        }
+        
+        try {
+            return findAll()
+                    .stream()
+                    .filter(launch -> status.equals(launch.getStatus()))
+                    .toList();
+        } catch (DatabaseOperationException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new DatabaseOperationException(DatabaseConstants.ERROR_RETRIEVING_LAUNCHES_BY_STATUS + status, e);
+        }
     }
 
     @Override
     public List<LaunchModel> findByRocketId(String rocketId) {
-        return findAll()
-                .stream()
-                .filter(launch -> rocketId.equals(launch.getRocketId()))
-                .toList();
+        if (rocketId == null || rocketId.trim().isEmpty()) {
+            throw new InvalidParameterException(DatabaseConstants.ROCKET_ID_NULL_OR_EMPTY);
+        }
+        
+        try {
+            return findAll()
+                    .stream()
+                    .filter(launch -> rocketId.equals(launch.getRocketId()))
+                    .toList();
+        } catch (DatabaseOperationException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new DatabaseOperationException(DatabaseConstants.ERROR_RETRIEVING_LAUNCHES_BY_ROCKET_ID + rocketId, e);
+        }
     }
 }

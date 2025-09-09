@@ -12,7 +12,7 @@ Esta API proporciona endpoints para consultar datos históricos y estadísticas 
 - ✅ Listado completo de lanzamientos
 - ✅ Paginación de resultados
 - ✅ Filtrado por estado (exitoso, fallido, próximo)
-- ✅ Filtrado por cohete
+- ✅ Filtrado por lanzamiento
 - ✅ Estadísticas generales
 - ✅ Documentación Swagger/OpenAPI
 - ✅ CORS habilitado
@@ -35,7 +35,7 @@ Esta API proporciona endpoints para consultar datos históricos y estadísticas 
 La documentación interactiva de la API está disponible en:
 
 - **Local**: `http://localhost:8080/api/swagger-ui`
-- **Producción**: `https://lbs33m5sf6.execute-api.us-east-1.amazonaws.com/prod/api/swagger-ui`
+- **Producción**: `https://lbs33m5sf6.execute-api.us-east-1.amazonaws.com/prod/api/swagger-ui/index.html`
 
 ## 🔗 Endpoints
 

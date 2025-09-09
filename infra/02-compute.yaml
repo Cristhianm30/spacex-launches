@@ -16,10 +16,6 @@ Parameters:
     Type: String
     Default: latest
     Description: Docker image tag for backend service
-  FrontendImageTag:
-    Type: String
-    Default: latest
-    Description: Docker image tag for frontend service
 
 Resources:
   # --- ECS Cluster ---
@@ -60,18 +56,6 @@ Resources:
         - Key: Environment
           Value: prod
 
-  FrontendLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub "/ecs/${ProjectName}-frontend"
-      RetentionInDays: 14
-      Tags:
-        - Key: Project
-          Value: !Ref ProjectName
-        - Key: Owner
-          Value: Cristhian Moreno
-        - Key: Environment
-          Value: prod
 
   # --- Task Definitions ---
   BackendTaskDefinition:
@@ -124,50 +108,6 @@ Resources:
         - Key: Environment
           Value: prod
 
-  FrontendTaskDefinition:
-    Type: AWS::ECS::TaskDefinition
-    Properties:
-      Family: !Sub "${ProjectName}-frontend-task"
-      Cpu: 256
-      Memory: 512
-      NetworkMode: awsvpc
-      RequiresCompatibilities: [FARGATE]
-      ExecutionRoleArn: 
-        Fn::ImportValue: !Sub "${ProjectName}-EcsTaskExecutionRoleArn"
-      TaskRoleArn: 
-        Fn::ImportValue: !Sub "${ProjectName}-EcsTaskRoleArn"
-      ContainerDefinitions:
-        - Name: !Sub "${ProjectName}-frontend"
-          Image: !Sub 
-            - "${RepoUri}:${ImageTag}"
-            - RepoUri: 
-                Fn::ImportValue: !Sub "${ProjectName}-FrontendEcrRepoUri"
-              ImageTag: !Ref FrontendImageTag
-          PortMappings:
-            - ContainerPort: 80
-              Protocol: tcp
-          Essential: true
-          LogConfiguration:
-            LogDriver: awslogs
-            Options:
-              awslogs-group: !Ref FrontendLogGroup
-              awslogs-region: !Ref AWS::Region
-              awslogs-stream-prefix: ecs
-          HealthCheck:
-            Command:
-              - CMD-SHELL
-              - "curl -f http://localhost/health || exit 1"
-            Interval: 30
-            Timeout: 5
-            Retries: 3
-            StartPeriod: 30
-      Tags:
-        - Key: Project
-          Value: !Ref ProjectName
-        - Key: Owner
-          Value: Cristhian Moreno
-        - Key: Environment
-          Value: prod
 
   # --- ECS Services ---
   BackendService:
@@ -206,41 +146,6 @@ Resources:
         - Key: Environment
           Value: prod
 
-  FrontendService:
-    Type: AWS::ECS::Service
-    Properties:
-      ServiceName: !Sub "${ProjectName}-frontend-service"
-      Cluster: !Ref ECSCluster
-      DesiredCount: 1
-      LaunchType: FARGATE
-      PlatformVersion: LATEST
-      NetworkConfiguration:
-        AwsvpcConfiguration:
-          AssignPublicIp: ENABLED
-          Subnets: !Ref Subnets
-          SecurityGroups: 
-            - Fn::ImportValue: !Sub "${ProjectName}-ECSSecurityGroupId"
-      TaskDefinition: !Ref FrontendTaskDefinition
-      LoadBalancers:
-        - ContainerName: !Sub "${ProjectName}-frontend"
-          ContainerPort: 80
-          TargetGroupArn: 
-            Fn::ImportValue: !Sub "${ProjectName}-FrontendTargetGroupArn"
-      HealthCheckGracePeriodSeconds: 60
-      DeploymentConfiguration:
-        MaximumPercent: 200
-        MinimumHealthyPercent: 50
-        DeploymentCircuitBreaker:
-          Enable: true
-          Rollback: true
-      EnableExecuteCommand: true
-      Tags:
-        - Key: Project
-          Value: !Ref ProjectName
-        - Key: Owner
-          Value: Cristhian Moreno
-        - Key: Environment
-          Value: prod
 
 Outputs:
   ECSClusterName:
@@ -255,20 +160,8 @@ Outputs:
     Export:
       Name: !Sub "${ProjectName}-BackendServiceName"
 
-  FrontendServiceName:
-    Description: Name of the Frontend ECS Service
-    Value: !Ref FrontendService
-    Export:
-      Name: !Sub "${ProjectName}-FrontendServiceName"
-
   BackendTaskDefinitionArn:
     Description: ARN of the Backend Task Definition
     Value: !Ref BackendTaskDefinition
     Export:
       Name: !Sub "${ProjectName}-BackendTaskDefinitionArn"
-
-  FrontendTaskDefinitionArn:
-    Description: ARN of the Frontend Task Definition
-    Value: !Ref FrontendTaskDefinition
-    Export:
-      Name: !Sub "${ProjectName}-FrontendTaskDefinitionArn"

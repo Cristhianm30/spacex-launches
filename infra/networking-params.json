@@ -1,11 +1,11 @@
 [
   {
     "ParameterKey": "VpcId",
-    "ParameterValue": "vpc-00a160..."
+    "ParameterValue": "vpc-00a160bee31a0f296"
   },
   {
     "ParameterKey": "Subnets",
-    "ParameterValue": "subnet-01957...,subnet-05271..."
+    "ParameterValue": "subnet-01957ee7e21376730,subnet-05271206b34527fa1"
   },
   {
     "ParameterKey": "ProjectName",

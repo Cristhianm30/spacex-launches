@@ -1,9 +1,5 @@
 [
   {
-    "ParameterKey": "VpcId",
-    "ParameterValue": "vpc-00a160bee31a0f296"
-  },
-  {
     "ParameterKey": "ProjectName",
     "ParameterValue": "spacex-launches"
   }

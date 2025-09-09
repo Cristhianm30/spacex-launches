@@ -3,231 +3,369 @@
   <!-- SpaceX Dashboard Header -->
   <div class="mb-6">
     <h1 class="text-2xl font-bold text-gray-800 dark:text-neutral-200">SpaceX Launch Dashboard</h1>
-    <p class="text-gray-600 dark:text-neutral-400">Track SpaceX missions, launches, and statistics</p>
+    <p class="text-gray-600 dark:text-neutral-400">
+      Track SpaceX missions, launches, and statistics
+    </p>
   </div>
 
   <!-- Statistics Grid -->
   <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
     @for (stat of stats; track stat.title) {
-      <!-- Stat Card -->
-      <div class="flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl hover:shadow-md transition-shadow dark:bg-neutral-800 dark:border-neutral-700">
-        <div class="p-4 md:p-5">
-          <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-x-2">
-              <!-- Icon based on stat type -->
-              @if (stat.title === 'Total Launches') {
-                <div class="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg dark:bg-blue-900/20">
-                  <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
-                  </svg>
-                </div>
-              } @else if (stat.title === 'Success Rate') {
-                <div class="flex items-center justify-center w-8 h-8 bg-green-100 rounded-lg dark:bg-green-900/20">
-                  <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                </div>
-              } @else if (stat.title === 'Successful Launches') {
-                <div class="flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-lg dark:bg-emerald-900/20">
-                  <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-                  </svg>
-                </div>
-              } @else if (stat.title === 'Failed Launches') {
-                <div class="flex items-center justify-center w-8 h-8 bg-red-100 rounded-lg dark:bg-red-900/20">
-                  <svg class="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/>
-                  </svg>
-                </div>
-              } @else if (stat.title === 'Upcoming Launches') {
-                <div class="flex items-center justify-center w-8 h-8 bg-purple-100 rounded-lg dark:bg-purple-900/20">
-                  <svg class="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                </div>
-              }
-              
-              <p class="text-xs uppercase font-medium text-gray-500 dark:text-neutral-500">
-                {{ stat.title }}
-              </p>
+    <!-- Stat Card -->
+    <div
+      class="flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl hover:shadow-md transition-shadow dark:bg-neutral-800 dark:border-neutral-700"
+    >
+      <div class="p-4 md:p-5">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-x-2">
+            <!-- Icon based on stat type -->
+            @if (stat.title === 'Total Launches') {
+            <div
+              class="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg dark:bg-blue-900/20"
+            >
+              <svg
+                class="w-4 h-4 text-blue-600 dark:text-blue-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+                />
+              </svg>
             </div>
-            
-            @if (stat.tooltip) {
-              <div class="hs-tooltip">
-                <div class="hs-tooltip-toggle">
-                  <svg class="shrink-0 size-4 text-gray-400 hover:text-gray-600 dark:text-neutral-500 dark:hover:text-neutral-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
-                  <span class="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-xs font-medium text-white rounded-md shadow-2xs dark:bg-neutral-700" role="tooltip">
-                    {{ stat.tooltip }}
-                  </span>
-                </div>
-              </div>
+            } @else if (stat.title === 'Success Rate') {
+            <div
+              class="flex items-center justify-center w-8 h-8 bg-green-100 rounded-lg dark:bg-green-900/20"
+            >
+              <svg
+                class="w-4 h-4 text-green-600 dark:text-green-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            } @else if (stat.title === 'Successful Launches') {
+            <div
+              class="flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-lg dark:bg-emerald-900/20"
+            >
+              <svg
+                class="w-4 h-4 text-emerald-600 dark:text-emerald-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                />
+              </svg>
+            </div>
+            } @else if (stat.title === 'Failed Launches') {
+            <div
+              class="flex items-center justify-center w-8 h-8 bg-red-100 rounded-lg dark:bg-red-900/20"
+            >
+              <svg
+                class="w-4 h-4 text-red-600 dark:text-red-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"
+                />
+              </svg>
+            </div>
+            } @else if (stat.title === 'Upcoming Launches') {
+            <div
+              class="flex items-center justify-center w-8 h-8 bg-purple-100 rounded-lg dark:bg-purple-900/20"
+            >
+              <svg
+                class="w-4 h-4 text-purple-600 dark:text-purple-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
             }
+
+            <p class="text-xs uppercase font-medium text-gray-500 dark:text-neutral-500">
+              {{ stat.title }}
+            </p>
           </div>
 
-          <div class="flex items-baseline">
-            <h3 class="text-2xl sm:text-3xl font-bold" 
-                [class]="stat.title === 'Failed Launches' ? 'text-red-600 dark:text-red-400' : 
-                         stat.title === 'Successful Launches' ? 'text-emerald-600 dark:text-emerald-400' :
-                         stat.title === 'Success Rate' ? 'text-green-600 dark:text-green-400' :
-                         stat.title === 'Upcoming Launches' ? 'text-purple-600 dark:text-purple-400' :
-                         'text-blue-600 dark:text-blue-400'">
-              {{ stat.value }}
-            </h3>
+          @if (stat.tooltip) {
+          <div class="hs-tooltip">
+            <div class="hs-tooltip-toggle">
+              <svg
+                class="shrink-0 size-4 text-gray-400 hover:text-gray-600 dark:text-neutral-500 dark:hover:text-neutral-400"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                <path d="M12 17h.01" />
+              </svg>
+              <span
+                class="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-xs font-medium text-white rounded-md shadow-2xs dark:bg-neutral-700"
+                role="tooltip"
+              >
+                {{ stat.tooltip }}
+              </span>
+            </div>
           </div>
+          }
+        </div>
+
+        <div class="flex items-baseline">
+          <h3
+            class="text-2xl sm:text-3xl font-bold"
+            [class]="
+              stat.title === 'Failed Launches'
+                ? 'text-red-600 dark:text-red-400'
+                : stat.title === 'Successful Launches'
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : stat.title === 'Success Rate'
+                ? 'text-green-600 dark:text-green-400'
+                : stat.title === 'Upcoming Launches'
+                ? 'text-purple-600 dark:text-purple-400'
+                : 'text-blue-600 dark:text-blue-400'
+            "
+          >
+            {{ stat.value }}
+          </h3>
         </div>
       </div>
-      <!-- End Stat Card -->
+    </div>
+    <!-- End Stat Card -->
     }
   </div>
   <!-- End Statistics Grid -->
 
   <!-- Error Message -->
   @if (error) {
-    <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 dark:bg-red-900/20 dark:border-red-800">
-      <div class="flex items-center">
-        <svg class="w-5 h-5 text-red-600 dark:text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-        </svg>
-        <p class="text-red-800 dark:text-red-200">{{ error }}</p>
-        <button (click)="refreshData()" class="ml-auto px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700">
-          Retry
-        </button>
-      </div>
+  <div
+    class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 dark:bg-red-900/20 dark:border-red-800"
+  >
+    <div class="flex items-center">
+      <svg
+        class="w-5 h-5 text-red-600 dark:text-red-400 mr-2"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+          clip-rule="evenodd"
+        />
+      </svg>
+      <p class="text-red-800 dark:text-red-200">{{ error }}</p>
+      <button
+        (click)="refreshData()"
+        class="ml-auto px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
+      >
+        Retry
+      </button>
     </div>
+  </div>
   }
 
   <!-- Loading State -->
   @if (isLoading) {
-    <div class="flex items-center justify-center py-12">
-      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      <span class="ml-3 text-gray-600 dark:text-neutral-400">Loading launch data...</span>
-    </div>
+  <div class="flex items-center justify-center py-12">
+    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    <span class="ml-3 text-gray-600 dark:text-neutral-400">Loading launch data...</span>
+  </div>
   }
 
   <!-- Recent Launches Section -->
   @if (!isLoading && !error) {
-    <div class="mt-8">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
-        <h2 class="text-xl font-semibold text-gray-800 dark:text-neutral-200">Launches</h2>
-        
-        <div class="flex items-center gap-3">
-          <!-- Status Filter -->
-          <div class="w-40">
-            <app-dropdown
-              [options]="statusOptions"
-              [selectedValue]="selectedStatus"
-              placeholder="All Status"
-              size="sm"
-              (selectionChange)="onStatusFilter($event)">
-            </app-dropdown>
-          </div>
-          
-          <!-- Refresh Button -->
-          <button (click)="refreshData()" class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-            </svg>
-            Refresh
-          </button>
+  <div class="mt-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
+      <h2 class="text-xl font-semibold text-gray-800 dark:text-neutral-200">Launches</h2>
+
+      <div class="flex items-center gap-3">
+        <!-- Status Filter -->
+        <div class="w-40">
+          <app-dropdown
+            [options]="statusOptions"
+            [selectedValue]="selectedStatus"
+            placeholder="All Status"
+            size="sm"
+            (selectionChange)="onStatusFilter($event)"
+          >
+          </app-dropdown>
         </div>
       </div>
-      
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        @for (launch of recentLaunches; track launch.launchId) {
-          <app-launch-card [launch]="launch" (cardClick)="onLaunchCardClick($event)"></app-launch-card>
-        }
-        
-        @if (recentLaunches.length === 0) {
-          <div class="col-span-full text-center py-8">
-            <svg class="w-12 h-12 mx-auto text-gray-400 dark:text-neutral-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-            </svg>
-            <p class="text-gray-500 dark:text-neutral-400">No launches found</p>
-          </div>
-        }
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      @for (launch of recentLaunches; track launch.launchId) {
+      <app-launch-card [launch]="launch" (cardClick)="onLaunchCardClick($event)"></app-launch-card>
+      } @if (recentLaunches.length === 0) {
+      <div class="col-span-full text-center py-8">
+        <svg
+          class="w-12 h-12 mx-auto text-gray-400 dark:text-neutral-600 mb-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+          />
+        </svg>
+        <p class="text-gray-500 dark:text-neutral-400">No launches found</p>
       </div>
-      
-      <!-- Pagination Controls -->
-      @if (totalPages > 1) {
-        <div class="mt-8 border-t border-gray-200 dark:border-neutral-700 pt-6">
-          <!-- Results Info -->
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div class="text-sm text-gray-600 dark:text-neutral-400">
-              Showing <span class="font-medium text-gray-900 dark:text-neutral-100">{{ (currentPage * pageSize) + 1 }}</span> 
-              to <span class="font-medium text-gray-900 dark:text-neutral-100">{{ Math.min((currentPage + 1) * pageSize, totalElements) }}</span> 
-              of <span class="font-medium text-gray-900 dark:text-neutral-100">{{ totalElements }}</span> results
-            </div>
-            
-            <!-- Pagination Navigation -->
-            <nav class="flex items-center justify-center sm:justify-end">
-              <div class="flex items-center space-x-1">
-                <!-- Previous Button -->
-                <button (click)="previousPage()" 
-                        [disabled]="currentPage === 0"
-                        class="relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-l-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-neutral-800 dark:border-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-700 transition-colors">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                  </svg>
-                  <span class="ml-1 hidden sm:inline">Previous</span>
-                </button>
-                
-                <!-- First Page -->
-                @if (getVisiblePages()[0] > 0) {
-                  <button (click)="goToPage(0)"
-                          class="relative inline-flex items-center px-3 py-2 text-sm font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-700 transition-colors">
-                    1
-                  </button>
-                  @if (getVisiblePages()[0] > 1) {
-                    <span class="relative inline-flex items-center px-3 py-2 text-sm font-medium border border-gray-300 bg-white text-gray-700 dark:bg-neutral-800 dark:border-neutral-600 dark:text-neutral-300">
-                      ...
-                    </span>
-                  }
-                }
-                
-                <!-- Visible Page Numbers -->
-                @for (pageNum of getVisiblePages(); track pageNum) {
-                  <button (click)="goToPage(pageNum)"
-                          [class]="pageNum === currentPage ? 
-                            'relative inline-flex items-center px-3 py-2 text-sm font-medium border border-blue-500 bg-blue-600 text-white hover:bg-blue-700 transition-colors' : 
-                            'relative inline-flex items-center px-3 py-2 text-sm font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-700 transition-colors'">
-                    {{ pageNum + 1 }}
-                  </button>
-                }
-                
-                <!-- Last Page -->
-                @if (getVisiblePages()[getVisiblePages().length - 1] < totalPages - 1) {
-                  @if (getVisiblePages()[getVisiblePages().length - 1] < totalPages - 2) {
-                    <span class="relative inline-flex items-center px-3 py-2 text-sm font-medium border border-gray-300 bg-white text-gray-700 dark:bg-neutral-800 dark:border-neutral-600 dark:text-neutral-300">
-                      ...
-                    </span>
-                  }
-                  <button (click)="goToPage(totalPages - 1)"
-                          class="relative inline-flex items-center px-3 py-2 text-sm font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-700 transition-colors">
-                    {{ totalPages }}
-                  </button>
-                }
-                
-                <!-- Next Button -->
-                <button (click)="nextPage()" 
-                        [disabled]="currentPage >= totalPages - 1"
-                        class="relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-r-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-neutral-800 dark:border-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-700 transition-colors">
-                  <span class="mr-1 hidden sm:inline">Next</span>
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                  </svg>
-                </button>
-              </div>
-            </nav>
-          </div>
-        </div>
       }
     </div>
+
+    <!-- Pagination Controls -->
+    @if (totalPages > 1) {
+    <div class="mt-8 border-t border-gray-200 dark:border-neutral-700 pt-6">
+      <!-- Results Info -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="text-sm text-gray-600 dark:text-neutral-400">
+          Showing
+          <span class="font-medium text-gray-900 dark:text-neutral-100">{{
+            currentPage * pageSize + 1
+          }}</span>
+          to
+          <span class="font-medium text-gray-900 dark:text-neutral-100">{{
+            Math.min((currentPage + 1) * pageSize, totalElements)
+          }}</span>
+          of
+          <span class="font-medium text-gray-900 dark:text-neutral-100">{{ totalElements }}</span>
+          results
+        </div>
+
+        <!-- Pagination Navigation -->
+        <nav class="flex items-center justify-center sm:justify-end">
+          <div class="flex items-center space-x-1">
+            <!-- Previous Button -->
+            <button
+              (click)="previousPage()"
+              [disabled]="currentPage === 0"
+              class="relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-l-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-neutral-800 dark:border-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-700 transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+              <span class="ml-1 hidden sm:inline">Previous</span>
+            </button>
+
+            <!-- First Page -->
+            @if (getVisiblePages()[0] > 0) {
+            <button
+              (click)="goToPage(0)"
+              class="relative inline-flex items-center px-3 py-2 text-sm font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-700 transition-colors"
+            >
+              1
+            </button>
+            @if (getVisiblePages()[0] > 1) {
+            <span
+              class="relative inline-flex items-center px-3 py-2 text-sm font-medium border border-gray-300 bg-white text-gray-700 dark:bg-neutral-800 dark:border-neutral-600 dark:text-neutral-300"
+            >
+              ...
+            </span>
+            } }
+
+            <!-- Visible Page Numbers -->
+            @for (pageNum of getVisiblePages(); track pageNum) {
+            <button
+              (click)="goToPage(pageNum)"
+              [class]="
+                pageNum === currentPage
+                  ? 'relative inline-flex items-center px-3 py-2 text-sm font-medium border border-blue-500 bg-blue-600 text-white hover:bg-blue-700 transition-colors'
+                  : 'relative inline-flex items-center px-3 py-2 text-sm font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-700 transition-colors'
+              "
+            >
+              {{ pageNum + 1 }}
+            </button>
+            }
+
+            <!-- Last Page -->
+            @if (getVisiblePages()[getVisiblePages().length - 1] < totalPages - 1) { @if
+            (getVisiblePages()[getVisiblePages().length - 1] < totalPages - 2) {
+            <span
+              class="relative inline-flex items-center px-3 py-2 text-sm font-medium border border-gray-300 bg-white text-gray-700 dark:bg-neutral-800 dark:border-neutral-600 dark:text-neutral-300"
+            >
+              ...
+            </span>
+            }
+            <button
+              (click)="goToPage(totalPages - 1)"
+              class="relative inline-flex items-center px-3 py-2 text-sm font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-700 transition-colors"
+            >
+              {{ totalPages }}
+            </button>
+            }
+
+            <!-- Next Button -->
+            <button
+              (click)="nextPage()"
+              [disabled]="currentPage >= totalPages - 1"
+              class="relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-r-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-neutral-800 dark:border-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-700 transition-colors"
+            >
+              <span class="mr-1 hidden sm:inline">Next</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+          </div>
+        </nav>
+      </div>
+    </div>
+    }
+  </div>
   }
 </div>
 
 <!-- Launch Detail Modal -->
-<app-launch-detail-modal 
+<app-launch-detail-modal
   [launchId]="selectedLaunchId"
   [isOpen]="isModalOpen"
-  (closeModal)="onModalClose()">
+  (closeModal)="onModalClose()"
+>
 </app-launch-detail-modal>

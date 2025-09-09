@@ -41,6 +41,14 @@ public class SwaggerConfig {
                         .allowedOrigins(CorsConstants.ALLOWED_ORIGINS)
                         .allowedMethods(CorsConstants.ALLOWED_METHODS)
                         .allowedHeaders(CorsConstants.ALLOWED_HEADERS);
+                registry.addMapping(CorsConstants.SWAGGER_CONFIG_MAPPING)
+                        .allowedOrigins(CorsConstants.ALLOWED_ORIGINS)
+                        .allowedMethods(CorsConstants.ALLOWED_METHODS)
+                        .allowedHeaders(CorsConstants.ALLOWED_HEADERS);
+                registry.addMapping(CorsConstants.V3_API_DOCS_MAPPING)
+                        .allowedOrigins(CorsConstants.ALLOWED_ORIGINS)
+                        .allowedMethods(CorsConstants.ALLOWED_METHODS)
+                        .allowedHeaders(CorsConstants.ALLOWED_HEADERS);
             }
         };
     }

@@ -14,3 +14,5 @@ springdoc:
   swagger-ui:
     enabled: true
     path: /swagger
+    config-url: /docs/swagger-config
+    url: /docs
